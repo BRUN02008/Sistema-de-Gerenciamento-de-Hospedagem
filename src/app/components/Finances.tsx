@@ -16,6 +16,10 @@ const monthlyData = [
 
 interface FinancesProps { store: Store; }
 
+function currencyTooltipValue(value: unknown) {
+  return typeof value === "number" ? `R$ ${value.toLocaleString("pt-BR")}` : String(value ?? "");
+}
+
 export function Finances({ store }: FinancesProps) {
   const { transactions, addTransaction } = store;
 
@@ -66,7 +70,7 @@ export function Finances({ store }: FinancesProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.4)" }}>
           <div className="rounded-2xl w-full max-w-md p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Nova Transação</h2>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Nova Transação</h2>
               <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}>✕</button>
             </div>
             <div className="flex flex-col gap-4">
@@ -114,7 +118,7 @@ export function Finances({ store }: FinancesProps) {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Financeiro</h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Financeiro</h1>
           <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>Controle de caixa · Junho 2026</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.875rem" }}>
@@ -128,7 +132,7 @@ export function Finances({ store }: FinancesProps) {
             <ArrowUpRight size={16} style={{ color: "#2d5016" }} />
             <span style={{ fontSize: "0.78rem", color: "#2d5016", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Receitas</span>
           </div>
-          <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.8rem", color: "#2d5016" }}>R$ {totalReceita.toLocaleString("pt-BR")}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.8rem", color: "#2d5016" }}>R$ {totalReceita.toLocaleString("pt-BR")}</div>
           <div className="flex items-center gap-1 mt-1"><TrendingUp size={12} style={{ color: "#2d5016" }} /><span style={{ fontSize: "0.75rem", color: "#2d5016" }}>+11.5% vs maio</span></div>
         </div>
         <div className="rounded-xl p-5" style={{ background: "#b9323210", border: "1.5px solid #b9323230" }}>
@@ -136,7 +140,7 @@ export function Finances({ store }: FinancesProps) {
             <ArrowDownRight size={16} style={{ color: "#b93232" }} />
             <span style={{ fontSize: "0.78rem", color: "#b93232", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Despesas</span>
           </div>
-          <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.8rem", color: "#b93232" }}>R$ {totalDespesa.toLocaleString("pt-BR")}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.8rem", color: "#b93232" }}>R$ {totalDespesa.toLocaleString("pt-BR")}</div>
           <div className="flex items-center gap-1 mt-1"><TrendingDown size={12} style={{ color: "#b93232" }} /><span style={{ fontSize: "0.75rem", color: "#b93232" }}>-3.2% vs maio</span></div>
         </div>
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
@@ -144,7 +148,7 @@ export function Finances({ store }: FinancesProps) {
             <div className="w-3 h-3 rounded-full" style={{ background: saldo >= 0 ? "#2d5016" : "#b93232" }} />
             <span style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Saldo Líquido</span>
           </div>
-          <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.8rem", color: saldo >= 0 ? "#2d5016" : "#b93232" }}>R$ {saldo.toLocaleString("pt-BR")}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.8rem", color: saldo >= 0 ? "#2d5016" : "#b93232" }}>R$ {saldo.toLocaleString("pt-BR")}</div>
           <div style={{ fontSize: "0.75rem", color: "var(--muted-foreground)", marginTop: 4 }}>Lucro do período</div>
         </div>
       </div>
@@ -152,7 +156,7 @@ export function Finances({ store }: FinancesProps) {
       <div className="grid gap-4" style={{ gridTemplateColumns: "2fr 1fr" }}>
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="mb-4">
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Fluxo de Caixa</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Fluxo de Caixa</h3>
             <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)" }}>Receitas vs Despesas — 6 meses</p>
           </div>
           <ResponsiveContainer width="100%" height={180}>
@@ -160,7 +164,7 @@ export function Finances({ store }: FinancesProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" vertical={false} />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: unknown, name: unknown) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val, name) => [currencyTooltipValue(val), name === "receita" ? "Receita" : "Despesa"]} />
               <Bar dataKey="receita" fill="#2d5016" radius={[3, 3, 0, 0]} />
               <Bar dataKey="despesa" fill="#c4882a" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -169,7 +173,7 @@ export function Finances({ store }: FinancesProps) {
 
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="mb-4">
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Despesas por Categoria</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Despesas por Categoria</h3>
           </div>
           {pieData.length > 0 ? (
             <>
@@ -178,7 +182,7 @@ export function Finances({ store }: FinancesProps) {
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={60} dataKey="value" paddingAngle={2}>
                     {pieData.map((_, idx) => <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: unknown, _name: unknown, props: { payload?: { name?: string } }) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, props.payload?.name ?? "Categoria"]} />
+                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val, _name, props) => [currencyTooltipValue(val), String(props.payload?.name ?? "")]} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-1.5 mt-2">
@@ -200,7 +204,7 @@ export function Finances({ store }: FinancesProps) {
       <div className="rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
         <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: "var(--border)" }}>
           <div>
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Extrato</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Extrato</h3>
             <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)" }}>{transactions.length} transações</p>
           </div>
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: "var(--muted)" }}>

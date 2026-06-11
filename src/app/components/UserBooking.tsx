@@ -32,6 +32,14 @@ function formatDate(s: string) {
   return `${d}/${m}/${y}`;
 }
 
+type DayVisualStyle = {
+  bg: string;
+  text: string;
+  cursor: string;
+  border?: string;
+  opacity?: number;
+};
+
 type Step = "rooms" | "dates" | "form" | "confirm";
 
 export function UserBooking({ store, onLogout }: UserBookingProps) {
@@ -99,7 +107,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
     return "available";
   }
 
-  function dayStyle(state: ReturnType<typeof getDayState>) {
+  function dayStyle(state: ReturnType<typeof getDayState>): DayVisualStyle {
     switch (state) {
       case "blocked": return { bg: "#b9323215", text: "#b93232", cursor: "not-allowed", border: "1px solid #b9323225" };
       case "past": return { bg: "transparent", text: "var(--muted-foreground)", cursor: "not-allowed", opacity: 0.4 };
@@ -159,14 +167,14 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
   const filteredRooms = rooms.filter(r => typeFilter === "Todos" || r.type === typeFilter);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 border-b" style={{ background: "var(--sidebar)", borderColor: "rgba(255,255,255,0.08)" }}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#c4882a" }}>
             <Trees size={16} style={{ color: "#1e2f12" }} />
           </div>
-          <div style={{ fontFamily: "'DM Serif Display', serif", color: "#e8e2d6", fontSize: "1.1rem" }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", color: "#e8e2d6", fontSize: "1.05rem", fontWeight: 600 }}>
             Tribo Hospedagem
           </div>
         </div>
@@ -177,7 +185,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
             </button>
           )}
           <button onClick={onLogout} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.08)", fontSize: "0.8rem", color: "#e8e2d6" }}>
-            <LogOut size={13} /> Sair
+            <LogOut size={13} /> Voltar ao Site
           </button>
         </div>
       </header>
@@ -188,7 +196,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
         {step === "rooms" && (
           <>
             <div className="mb-6">
-              <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.8rem", color: "var(--foreground)" }}>Escolha seu quarto</h1>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.8rem", color: "var(--foreground)" }}>Escolha seu quarto</h1>
               <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)", marginTop: 4 }}>Selecione o tipo de acomodação ideal para você</p>
             </div>
 
@@ -221,7 +229,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                     </div>
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-1">
-                        <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.05rem", color: "var(--foreground)" }}>{room.name}</div>
+                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.05rem", color: "var(--foreground)" }}>{room.name}</div>
                         <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.9rem", color: "var(--foreground)", fontWeight: 600 }}>R$ {room.price}<span style={{ fontSize: "0.65rem", color: "var(--muted-foreground)", fontWeight: 400 }}>/noite</span></div>
                       </div>
                       <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)", marginBottom: 12 }}>{room.description}</p>
@@ -232,7 +240,9 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                         <div className="flex gap-1.5">
                           {room.amenities.map(a => {
                             const cfg = amenityIcons[a];
-                            return cfg ? <span key={a} title={cfg.label}><cfg.icon size={13} style={{ color: "var(--muted-foreground)" }} /></span> : null;
+                            if (!cfg) return null;
+                            const AmenityIcon = cfg.icon;
+                            return <AmenityIcon key={a} size={13} style={{ color: "var(--muted-foreground)" }} aria-label={cfg.label} />;
                           })}
                         </div>
                       </div>
@@ -252,7 +262,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                 <ChevronLeft size={20} />
               </button>
               <div>
-                <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.6rem", color: "var(--foreground)" }}>Escolha as datas</h1>
+                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.6rem", color: "var(--foreground)" }}>Escolha as datas</h1>
                 <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>{selectedRoom.name} · R$ {selectedRoom.price}/noite</p>
               </div>
             </div>
@@ -261,7 +271,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
               {/* Calendar */}
               <div className="rounded-2xl p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>{months[calMonth]} {calYear}</h3>
+                  <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>{months[calMonth]} {calYear}</h3>
                   <div className="flex gap-2">
                     <button onClick={() => setCalDate(new Date(calYear, calMonth - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}>
                       <ChevronLeft size={16} />
@@ -295,7 +305,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                       <div
                         key={day}
                         className="aspect-square rounded-lg flex items-center justify-center select-none"
-                        style={{ background: s.bg, color: s.text, cursor: s.cursor, fontSize: "0.85rem", opacity: "opacity" in s ? s.opacity : undefined }}
+                        style={{ background: s.bg, color: s.text, cursor: s.cursor, fontSize: "0.85rem", opacity: s.opacity }}
                         onClick={() => handleDayClick(dateStr)}
                         onMouseEnter={() => setHoverDate(dateStr)}
                         onMouseLeave={() => setHoverDate(null)}
@@ -314,7 +324,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                   <div className="mb-4">
                     <img src={selectedRoom.image} alt={selectedRoom.name} className="w-full rounded-xl object-cover" style={{ height: 120 }} />
                   </div>
-                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.1rem", color: "var(--foreground)", marginBottom: 4 }}>{selectedRoom.name}</div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1rem", color: "var(--foreground)", marginBottom: 4 }}>{selectedRoom.name}</div>
                   <div style={{ fontSize: "0.8rem", color: "var(--muted-foreground)", marginBottom: 16 }}>{selectedRoom.type} · {selectedRoom.capacity} hóspedes</div>
 
                   {checkin && (
@@ -370,7 +380,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                 <ChevronLeft size={20} />
               </button>
               <div>
-                <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.6rem", color: "var(--foreground)" }}>Seus dados</h1>
+                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.6rem", color: "var(--foreground)" }}>Seus dados</h1>
                 <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>Preencha para finalizar a reserva</p>
               </div>
             </div>
@@ -406,7 +416,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
               {/* Summary */}
               <div className="flex flex-col gap-4">
                 <div className="rounded-2xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-                  <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1rem", color: "var(--foreground)", marginBottom: 12 }}>Resumo da Reserva</div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1rem", color: "var(--foreground)", marginBottom: 12 }}>Resumo da Reserva</div>
                   <div className="flex flex-col gap-2.5">
                     {[
                       { label: "Acomodação", val: selectedRoom.name },
@@ -443,7 +453,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: "#2d501618", border: "2px solid #2d5016" }}>
                 <Check size={28} style={{ color: "#2d5016" }} />
               </div>
-              <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "2rem", color: "var(--foreground)", marginBottom: 8 }}>Reserva Confirmada!</h1>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "2rem", color: "var(--foreground)", marginBottom: 8 }}>Reserva Confirmada!</h1>
               <p style={{ fontSize: "0.9rem", color: "var(--muted-foreground)", marginBottom: 24 }}>
                 Sua reserva foi registrada com sucesso. Aguarde a confirmação da nossa equipe.
               </p>

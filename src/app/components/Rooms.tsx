@@ -57,7 +57,7 @@ export function Rooms({ store }: RoomsProps) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Quartos</h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Quartos</h1>
         <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>{rooms.length} unidades · {counts.disponível} disponíveis hoje</p>
       </div>
 
@@ -67,7 +67,7 @@ export function Rooms({ store }: RoomsProps) {
           <div key={s} className="rounded-xl p-4 flex items-center gap-3" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
             <div className="w-2 h-8 rounded-full" style={{ background: statusConfig[s].dot }} />
             <div>
-              <div style={{ fontSize: "1.4rem", fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>{counts[s]}</div>
+              <div style={{ fontSize: "1.4rem", fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>{counts[s]}</div>
               <div style={{ fontSize: "0.75rem", color: "var(--muted-foreground)", textTransform: "capitalize" }}>{statusConfig[s].label}</div>
             </div>
           </div>
@@ -94,7 +94,7 @@ export function Rooms({ store }: RoomsProps) {
               <div className="relative h-36 overflow-hidden">
                 <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
                 <div className="absolute top-3 left-3">
-                  <span className="px-2 py-1 rounded-full" style={{ fontSize: "0.68rem", background: sc.bg, color: sc.text, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", backdropFilter: "blur(6px)" }}>
+                  <span className="px-2 py-1 rounded-full" style={{ fontSize: "0.68rem", background: "rgba(255,255,255,0.85)", color: sc.text, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", backdropFilter: "blur(6px)" }}>
                     {sc.label}
                   </span>
                 </div>
@@ -102,7 +102,7 @@ export function Rooms({ store }: RoomsProps) {
               <div className="p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1rem", color: "var(--foreground)" }}>{room.name}</div>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1rem", color: "var(--foreground)" }}>{room.name}</div>
                     <div style={{ fontSize: "0.78rem", color: typeColors[room.type], fontWeight: 500 }}>{room.type}</div>
                   </div>
                   <div style={{ textAlign: "right" }}>
@@ -117,7 +117,9 @@ export function Rooms({ store }: RoomsProps) {
                   <div className="flex items-center gap-1.5 ml-auto">
                     {room.amenities.map(a => {
                       const cfg = amenityIcons[a];
-                      return cfg ? <span key={a} title={cfg.label}><cfg.icon size={13} style={{ color: "var(--muted-foreground)" }} /></span> : null;
+                      if (!cfg) return null;
+                      const AmenityIcon = cfg.icon;
+                      return <AmenityIcon key={a} size={13} style={{ color: "var(--muted-foreground)" }} aria-label={cfg.label} />;
                     })}
                   </div>
                 </div>
@@ -136,7 +138,7 @@ export function Rooms({ store }: RoomsProps) {
       {selected && (
         <div className="fixed inset-y-0 right-0 w-80 shadow-2xl flex flex-col z-40" style={{ background: "var(--card)", borderLeft: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>{selected.name}</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>{selected.name}</h3>
             <button onClick={() => setSelected(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={14} /></button>
           </div>
           <div className="h-44 overflow-hidden">

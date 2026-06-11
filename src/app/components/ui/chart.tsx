@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
+import type { TooltipContentProps } from "recharts";
 
 import { cn } from "./utils";
 
@@ -20,23 +21,6 @@ export type ChartConfig = {
 
 type ChartContextProps = {
   config: ChartConfig;
-};
-
-type ChartPayloadItem = {
-  color?: string;
-  dataKey?: string | number;
-  name?: string | number;
-  value?: string | number;
-  payload?: Record<string, unknown> & {
-    fill?: string;
-  };
-};
-
-type ChartLegendPayloadItem = {
-  color?: string;
-  dataKey?: string | number;
-  value?: string | number;
-  payload?: Record<string, unknown>;
 };
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
@@ -121,6 +105,20 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
+type ChartTooltipContentProps = React.ComponentProps<"div"> &
+  Pick<
+    TooltipContentProps,
+    "active" | "payload" | "label" | "labelFormatter" | "formatter"
+  > & {
+    hideLabel?: boolean;
+    hideIndicator?: boolean;
+    indicator?: "line" | "dot" | "dashed";
+    nameKey?: string;
+    labelKey?: string;
+    color?: string;
+    labelClassName?: string;
+  };
+
 function ChartTooltipContent({
   active,
   payload,
@@ -135,30 +133,7 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  Omit<React.ComponentProps<"div">, "color"> & {
-    active?: boolean;
-    color?: string;
-    formatter?: (
-      value: NonNullable<ChartPayloadItem["value"]>,
-      name: NonNullable<ChartPayloadItem["name"]>,
-      item: ChartPayloadItem,
-      index: number,
-      payload?: ChartPayloadItem["payload"],
-    ) => React.ReactNode;
-    hideLabel?: boolean;
-    hideIndicator?: boolean;
-    indicator?: "line" | "dot" | "dashed";
-    label?: unknown;
-    labelFormatter?: (
-      label: React.ReactNode,
-      payload: ChartPayloadItem[],
-    ) => React.ReactNode;
-    labelClassName?: string;
-    payload?: ChartPayloadItem[];
-    nameKey?: string;
-    labelKey?: string;
-  }) {
+}: ChartTooltipContentProps) {
   const { config } = useChart();
 
   const tooltipLabel = React.useMemo(() => {
@@ -215,11 +190,11 @@ function ChartTooltipContent({
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
-          const indicatorColor = color || item.payload?.fill || item.color;
+          const indicatorColor = color || item.payload.fill || item.color;
 
           return (
             <div
-              key={item.dataKey}
+              key={String(item.dataKey ?? item.name ?? index)}
               className={cn(
                 "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5",
                 indicator === "dot" && "items-center",
@@ -283,6 +258,13 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend;
 
+type ChartLegendPayloadItem = {
+  value?: React.ReactNode;
+  dataKey?: string | number;
+  color?: string;
+  payload?: unknown;
+};
+
 function ChartLegendContent({
   className,
   hideIcon = false,
@@ -291,10 +273,10 @@ function ChartLegendContent({
   nameKey,
 }: React.ComponentProps<"div"> &
   {
+    payload?: ChartLegendPayloadItem[];
+    verticalAlign?: "top" | "bottom" | "middle";
     hideIcon?: boolean;
     nameKey?: string;
-    payload?: ChartLegendPayloadItem[];
-    verticalAlign?: "top" | "bottom";
   }) {
   const { config } = useChart();
 
@@ -310,13 +292,13 @@ function ChartLegendContent({
         className,
       )}
     >
-      {payload.map((item) => {
+      {payload.map((item, index) => {
         const key = `${nameKey || item.dataKey || "value"}`;
         const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
         return (
           <div
-            key={item.value}
+            key={String(item.value ?? item.dataKey ?? index)}
             className={cn(
               "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
             )}

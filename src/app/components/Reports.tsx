@@ -58,7 +58,7 @@ export function Reports({ store }: ReportsProps) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Relatórios</h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Relatórios</h1>
           <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>Desempenho · 2026</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: "var(--muted)", color: "var(--foreground)", fontSize: "0.875rem" }}>
@@ -70,7 +70,7 @@ export function Reports({ store }: ReportsProps) {
         {kpiCards.map(kpi => (
           <div key={kpi.label} className="rounded-xl p-4" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
             <div style={{ fontSize: "0.72rem", color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>{kpi.label}</div>
-            <div style={{ fontFamily: "'DM Serif Display', serif", fontSize: "1.4rem", color: "var(--foreground)" }}>{kpi.value}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.4rem", color: "var(--foreground)" }}>{kpi.value}</div>
             <div className="flex items-center gap-1 mt-1">
               <TrendingUp size={11} style={{ color: "#2d5016" }} />
               <span style={{ fontSize: "0.72rem", color: "#2d5016" }}>{kpi.sub}</span>
@@ -82,7 +82,7 @@ export function Reports({ store }: ReportsProps) {
       <div className="grid gap-4" style={{ gridTemplateColumns: "3fr 2fr" }}>
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="mb-4">
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Ocupação & Receita</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Ocupação & Receita</h3>
             <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)" }}>Tendência semestral</p>
           </div>
           <ResponsiveContainer width="100%" height={220}>
@@ -101,7 +101,7 @@ export function Reports({ store }: ReportsProps) {
 
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="mb-4">
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Performance Geral</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Performance Geral</h3>
             <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)" }}>Indicadores — Junho</p>
           </div>
           <ResponsiveContainer width="100%" height={220}>
@@ -117,7 +117,7 @@ export function Reports({ store }: ReportsProps) {
       {revenueByType.length > 0 && (
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="mb-4">
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Receita por Segmento</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Receita por Segmento</h3>
             <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)" }}>Junho 2026</p>
           </div>
           <ResponsiveContainer width="100%" height={120}>
@@ -125,7 +125,7 @@ export function Reports({ store }: ReportsProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="tipo" tick={{ fontSize: 12, fill: "#7a7060" }} axisLine={false} tickLine={false} width={80} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: unknown) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, "Receita"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val) => [typeof val === "number" ? `R$ ${val.toLocaleString("pt-BR")}` : String(val ?? ""), "Receita"]} />
               <Bar dataKey="valor" fill="#2d5016" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -136,7 +136,7 @@ export function Reports({ store }: ReportsProps) {
       <div className="rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
         <div className="px-6 py-4 border-b flex items-center gap-2" style={{ borderColor: "var(--border)" }}>
           <Clock size={16} style={{ color: "var(--muted-foreground)" }} />
-          <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Histórico Completo</h3>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Histórico Completo</h3>
           <span className="ml-1 px-2 py-0.5 rounded-full" style={{ fontSize: "0.7rem", background: "#2d501618", color: "#2d5016", fontWeight: 600 }}>{history.length} eventos</span>
         </div>
         <div className="divide-y" style={{ borderColor: "var(--border)" }}>

@@ -59,7 +59,7 @@ function NewReservationModal({ store, onClose }: { store: Store; onClose: () => 
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.45)" }}>
       <div className="rounded-2xl w-full max-w-lg p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
         <div className="flex items-center justify-between mb-5">
-          <h2 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Nova Reserva</h2>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Nova Reserva</h2>
           <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={15} /></button>
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -143,7 +143,7 @@ export function Reservations({ store }: ReservationsProps) {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Reservas</h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Reservas</h1>
           <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>{reservations.length} registros</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.875rem" }}>
@@ -211,7 +211,7 @@ export function Reservations({ store }: ReservationsProps) {
       ) : (
         <div className="rounded-xl p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between mb-5">
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>{months[month]} {year}</h2>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>{months[month]} {year}</h2>
             <div className="flex gap-2">
               <button onClick={() => setCalDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><ChevronLeft size={16} /></button>
               <button onClick={() => setCalDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><ChevronRight size={16} /></button>
@@ -246,13 +246,13 @@ export function Reservations({ store }: ReservationsProps) {
       {selected && (
         <div className="fixed inset-y-0 right-0 w-80 shadow-2xl flex flex-col z-40" style={{ background: "var(--card)", borderLeft: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Reserva {selected.id}</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Reserva {selected.id}</h3>
             <button onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={14} /></button>
           </div>
           <div className="flex-1 px-5 py-4 overflow-y-auto flex flex-col gap-4">
             <div>
               <div style={{ fontSize: "0.7rem", color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Hóspede</div>
-              <div style={{ fontSize: "1.1rem", fontFamily: "'DM Serif Display', serif", color: "var(--foreground)", marginTop: 2 }}>{selected.guest}</div>
+              <div style={{ fontSize: "1.1rem", fontFamily: "'Playfair Display', serif", color: "var(--foreground)", marginTop: 2 }}>{selected.guest}</div>
               <div style={{ fontSize: "0.82rem", color: "var(--muted-foreground)" }}>{selected.phone}</div>
               <div style={{ fontSize: "0.82rem", color: "var(--muted-foreground)" }}>{selected.email}</div>
             </div>

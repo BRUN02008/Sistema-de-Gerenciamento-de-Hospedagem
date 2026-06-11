@@ -47,7 +47,7 @@ function StatCard({ icon: Icon, label, value, trend, sub }: {
         </div>
       </div>
       <div>
-        <div style={{ fontSize: "1.6rem", fontFamily: "'DM Serif Display', serif", color: "var(--foreground)", lineHeight: 1.1 }}>{value}</div>
+        <div style={{ fontSize: "1.6rem", fontFamily: "'Playfair Display', serif", color: "var(--foreground)", lineHeight: 1.1 }}>{value}</div>
         {(trend !== undefined || sub) && (
           <div className="flex items-center gap-1.5 mt-1">
             {trend !== undefined && (
@@ -70,6 +70,10 @@ function formatTime(iso: string) {
   return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
+function currencyTooltipValue(value: unknown) {
+  return typeof value === "number" ? `R$ ${value.toLocaleString("pt-BR")}` : String(value ?? "");
+}
+
 interface DashboardProps {
   store: Store;
 }
@@ -88,7 +92,7 @@ export function Dashboard({ store }: DashboardProps) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Visão Geral</h1>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Visão Geral</h1>
         <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>Junho 2026 · Dados em tempo real</p>
       </div>
 
@@ -102,7 +106,7 @@ export function Dashboard({ store }: DashboardProps) {
       <div className="grid gap-4" style={{ gridTemplateColumns: "2fr 1fr" }}>
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="mb-4">
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Receita vs Despesas</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Receita vs Despesas</h3>
             <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)" }}>Últimos 6 meses</p>
           </div>
           <ResponsiveContainer width="100%" height={200}>
@@ -120,7 +124,7 @@ export function Dashboard({ store }: DashboardProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: unknown, name: unknown) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val, name) => [currencyTooltipValue(val), name === "receita" ? "Receita" : "Despesa"]} />
               <Area type="monotone" dataKey="receita" stroke="#2d5016" strokeWidth={2} fill="url(#recG)" />
               <Area type="monotone" dataKey="despesa" stroke="#c4882a" strokeWidth={2} fill="url(#despG)" />
             </AreaChart>
@@ -129,7 +133,7 @@ export function Dashboard({ store }: DashboardProps) {
 
         <div className="rounded-xl p-5" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="mb-4">
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Ocupação Semanal</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Ocupação Semanal</h3>
             <p style={{ fontSize: "0.8rem", color: "var(--muted-foreground)" }}>Esta semana</p>
           </div>
           <ResponsiveContainer width="100%" height={200}>
@@ -137,7 +141,7 @@ export function Dashboard({ store }: DashboardProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" vertical={false} />
               <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} domain={[0, 100]} tickFormatter={v => `${v}%`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: unknown) => [`${Number(val ?? 0)}%`, "Taxa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val) => [`${val ?? ""}%`, "Taxa"]} />
               <Bar dataKey="taxa" fill="#2d5016" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -148,7 +152,7 @@ export function Dashboard({ store }: DashboardProps) {
         {/* Recent reservations */}
         <div className="rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Reservas Recentes</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Reservas Recentes</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -181,7 +185,7 @@ export function Dashboard({ store }: DashboardProps) {
         {/* History log */}
         <div className="rounded-xl" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
           <div className="px-5 py-4 border-b flex items-center gap-2" style={{ borderColor: "var(--border)" }}>
-            <h3 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)" }}>Histórico</h3>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Histórico</h3>
             <span className="px-2 py-0.5 rounded-full ml-1" style={{ fontSize: "0.7rem", background: "#2d501618", color: "#2d5016", fontWeight: 600 }}>{history.length}</span>
           </div>
           <div className="overflow-y-auto" style={{ maxHeight: 320 }}>

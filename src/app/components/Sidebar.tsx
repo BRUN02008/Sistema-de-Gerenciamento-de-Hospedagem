@@ -26,7 +26,7 @@ export function Sidebar({ activePage, onNavigate, onLogout }: SidebarProps) {
           <Trees size={16} style={{ color: "var(--sidebar-primary-foreground)" }} />
         </div>
         <div>
-          <div style={{ fontFamily: "'DM Serif Display', serif", color: "var(--sidebar-foreground)", fontSize: "0.95rem", lineHeight: 1.2 }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", color: "var(--sidebar-foreground)", fontSize: "0.95rem", lineHeight: 1.2 }}>
             Tribo Hospedagem
           </div>
           <div style={{ fontSize: "0.65rem", color: "var(--sidebar-primary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>

@@ -26,7 +26,7 @@ export function Login({ onLogin }: LoginProps) {
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--sidebar)" }}>
             <Trees size={28} style={{ color: "#c4882a" }} />
           </div>
-          <h1 style={{ fontFamily: "'DM Serif Display', serif", fontSize: "2rem", color: "var(--foreground)" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "2rem", color: "var(--foreground)" }}>
             Tribo Hospedagem
           </h1>
           <p style={{ fontSize: "0.875rem", color: "var(--muted-foreground)", marginTop: 4 }}>
@@ -66,7 +66,7 @@ export function Login({ onLogin }: LoginProps) {
           </div>
         ) : (
           <div className="rounded-2xl p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-            <h2 style={{ fontFamily: "'DM Serif Display', serif", color: "var(--foreground)", marginBottom: 16 }}>Acesso Admin</h2>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)", marginBottom: 16 }}>Acesso Admin</h2>
             <div className="flex flex-col gap-3">
               <div>
                 <label style={{ fontSize: "0.8rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 6 }}>Senha</label>
