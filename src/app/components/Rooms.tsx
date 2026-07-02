@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BedDouble, Users, Wifi, Wind, Coffee, Check, X } from "lucide-react";
+import { Users, Wifi, Wind, Coffee, Check, X } from "lucide-react";
 import type { Store } from "../store/useStore";
 import { getBlockedDates } from "../store/useStore";
 
@@ -30,7 +30,6 @@ export function Rooms({ store }: RoomsProps) {
       const activeRes = reservations.find(r => r.roomId === roomId && r.status === "hospedado" && todayStr >= r.checkin && todayStr < r.checkout);
       return activeRes ? "ocupado" : "reservado";
     }
-    const futureRes = reservations.find(r => r.roomId === roomId && r.status !== "cancelado" && r.checkin > todayStr);
     return "disponível";
   }
 
@@ -95,7 +94,7 @@ export function Rooms({ store }: RoomsProps) {
               <div className="relative h-36 overflow-hidden">
                 <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
                 <div className="absolute top-3 left-3">
-                  <span className="px-2 py-1 rounded-full" style={{ fontSize: "0.68rem", background: sc.bg, color: sc.text, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", backdropFilter: "blur(6px)", background: "rgba(255,255,255,0.85)" }}>
+                  <span className="px-2 py-1 rounded-full" style={{ fontSize: "0.68rem", color: sc.text, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", backdropFilter: "blur(6px)", background: "rgba(255,255,255,0.85)" }}>
                     {sc.label}
                   </span>
                 </div>
@@ -116,7 +115,7 @@ export function Rooms({ store }: RoomsProps) {
                     <Users size={12} /> {room.capacity} hóspedes
                   </div>
                   <div className="flex items-center gap-1.5 ml-auto">
-                    {room.amenities.map(a => { const cfg = amenityIcons[a]; return cfg ? <cfg.icon key={a} size={13} style={{ color: "var(--muted-foreground)" }} title={cfg.label} /> : null; })}
+                    {room.amenities.map(a => { const cfg = amenityIcons[a]; return cfg ? <cfg.icon key={a} size={13} style={{ color: "var(--muted-foreground)" }} aria-label={cfg.label} /> : null; })}
                   </div>
                 </div>
                 {next && status === "reservado" && (
@@ -178,7 +177,7 @@ export function Rooms({ store }: RoomsProps) {
             <div>
               <div style={{ fontSize: "0.7rem", color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Comodidades</div>
               <div className="flex flex-col gap-2">
-                {Object.entries(amenityIcons).map(([key, { icon: Icon, label }]) => {
+                {Object.entries(amenityIcons).map(([key, { label }]) => {
                   const has = selected.amenities.includes(key);
                   return (
                     <div key={key} className="flex items-center gap-2.5">
@@ -197,3 +196,4 @@ export function Rooms({ store }: RoomsProps) {
     </div>
   );
 }
+

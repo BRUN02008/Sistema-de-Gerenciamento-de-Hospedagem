@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Plus, ChevronLeft, ChevronRight, X, Search } from "lucide-react";
 import type { Store } from "../store/useStore";
-import { getBlockedDates, isRoomAvailable } from "../store/useStore";
+import { isRoomAvailable } from "../store/useStore";
 
 const statusColors: Record<string, { bg: string; text: string }> = {
   confirmado: { bg: "#2d501618", text: "#2d5016" },
@@ -110,7 +110,7 @@ function NewReservationModal({ store, onClose }: { store: Store; onClose: () => 
 }
 
 export function Reservations({ store }: ReservationsProps) {
-  const { reservations, rooms, cancelReservation, checkinReservation, checkoutReservation, updateReservation } = store;
+  const { reservations, cancelReservation, checkinReservation, checkoutReservation, updateReservation } = store;
 
   const [calDate, setCalDate] = useState(new Date(2026, 5, 1));
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -127,7 +127,7 @@ export function Reservations({ store }: ReservationsProps) {
   const selected = reservations.find(r => r.id === selectedId) || null;
 
   const filtered = reservations.filter(r => {
-    const matchSearch = r.guest.toLowerCase().includes(search.toLowerCase()) || r.roomName.toLowerCase().includes(search.toLowerCase()) || r.id.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = r.guest.toLowerCase().includes(search.toLowerCase()) || (r.roomName ?? r.accommodationName).toLowerCase().includes(search.toLowerCase()) || r.id.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "todos" || r.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -190,7 +190,7 @@ export function Reservations({ store }: ReservationsProps) {
                   <tr key={r.id} onClick={() => setSelectedId(r.id)} className="cursor-pointer" style={{ borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none" }}>
                     <td className="px-5 py-3.5" style={{ fontSize: "0.78rem", fontFamily: "'DM Mono', monospace", color: "var(--muted-foreground)" }}>{r.id}</td>
                     <td className="px-5 py-3.5" style={{ fontSize: "0.875rem", color: "var(--foreground)", fontWeight: 500 }}>{r.guest}</td>
-                    <td className="px-5 py-3.5" style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>{r.roomName}</td>
+                    <td className="px-5 py-3.5" style={{ fontSize: "0.875rem", color: "var(--muted-foreground)" }}>{r.roomName ?? r.accommodationName}</td>
                     <td className="px-5 py-3.5" style={{ fontSize: "0.8rem", fontFamily: "'DM Mono', monospace", color: "var(--foreground)" }}>{fmt(r.checkin)}</td>
                     <td className="px-5 py-3.5" style={{ fontSize: "0.8rem", fontFamily: "'DM Mono', monospace", color: "var(--foreground)" }}>{fmt(r.checkout)}</td>
                     <td className="px-5 py-3.5" style={{ fontSize: "0.875rem", fontFamily: "'DM Mono', monospace", color: "var(--foreground)" }}>R$ {r.value.toLocaleString("pt-BR")}</td>
@@ -258,7 +258,7 @@ export function Reservations({ store }: ReservationsProps) {
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               {[
-                { label: "Quarto", value: selected.roomName },
+                { label: "Quarto", value: (selected.roomName ?? selected.accommodationName) },
                 { label: "Hóspedes", value: `${selected.guests} pessoa${selected.guests > 1 ? "s" : ""}` },
                 { label: "Check-in", value: fmt(selected.checkin) },
                 { label: "Check-out", value: fmt(selected.checkout) },
@@ -286,12 +286,12 @@ export function Reservations({ store }: ReservationsProps) {
           </div>
           <div className="px-5 pb-5 flex flex-col gap-2">
             {selected.status === "confirmado" && (
-              <button onClick={() => checkinReservation(selected.id, selected.guest, selected.roomName)} className="w-full py-2.5 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.875rem" }}>
+              <button onClick={() => checkinReservation(selected.id, selected.guest, (selected.roomName ?? selected.accommodationName))} className="w-full py-2.5 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.875rem" }}>
                 ✓ Fazer Check-in
               </button>
             )}
             {selected.status === "hospedado" && (
-              <button onClick={() => checkoutReservation(selected.id, selected.guest, selected.roomName)} className="w-full py-2.5 rounded-xl" style={{ background: "#1e5f74", color: "#fdfaf5", fontSize: "0.875rem" }}>
+              <button onClick={() => checkoutReservation(selected.id, selected.guest, (selected.roomName ?? selected.accommodationName))} className="w-full py-2.5 rounded-xl" style={{ background: "#1e5f74", color: "#fdfaf5", fontSize: "0.875rem" }}>
                 ✓ Fazer Check-out
               </button>
             )}
@@ -301,7 +301,7 @@ export function Reservations({ store }: ReservationsProps) {
               </button>
             )}
             {selected.status !== "cancelado" && (
-              <button onClick={() => { cancelReservation(selected.id, selected.guest, selected.roomName); setSelectedId(null); }} className="w-full py-2.5 rounded-xl" style={{ background: "#b9323218", color: "#b93232", fontSize: "0.875rem" }}>
+              <button onClick={() => { cancelReservation(selected.id, selected.guest, (selected.roomName ?? selected.accommodationName)); setSelectedId(null); }} className="w-full py-2.5 rounded-xl" style={{ background: "#b9323218", color: "#b93232", fontSize: "0.875rem" }}>
                 Cancelar Reserva
               </button>
             )}
@@ -311,3 +311,4 @@ export function Reservations({ store }: ReservationsProps) {
     </div>
   );
 }
+

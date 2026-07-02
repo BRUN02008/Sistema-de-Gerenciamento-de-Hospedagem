@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import type { Store } from "../store/useStore";
+import type { PaymentMethod, Store } from "../store/useStore";
 
 const PIE_COLORS = ["#2d5016", "#c4882a", "#4a7c2f", "#8b5e1a", "#b8b0a0"];
 
@@ -21,7 +21,7 @@ export function Finances({ store }: FinancesProps) {
 
   const [typeFilter, setTypeFilter] = useState<"todos" | "receita" | "despesa">("todos");
   const [showModal, setShowModal] = useState(false);
-  const [newTx, setNewTx] = useState({ description: "", category: "Hospedagem", type: "receita" as "receita" | "despesa", value: "", method: "Pix" });
+  const [newTx, setNewTx] = useState({ description: "", category: "Hospedagem", type: "receita" as "receita" | "despesa", value: "", method: "Pix" as PaymentMethod });
   const [formError, setFormError] = useState("");
 
   const totalReceita = transactions.filter(t => t.type === "receita").reduce((s, t) => s + t.value, 0);
@@ -56,7 +56,7 @@ export function Finances({ store }: FinancesProps) {
       method: newTx.method,
     });
     setShowModal(false);
-    setNewTx({ description: "", category: "Hospedagem", type: "receita", value: "", method: "Pix" });
+    setNewTx({ description: "", category: "Hospedagem", type: "receita", value: "", method: "Pix" as PaymentMethod });
     setFormError("");
   }
 
@@ -91,8 +91,8 @@ export function Finances({ store }: FinancesProps) {
                 </div>
                 <div>
                   <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>Pagamento</label>
-                  <select value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value }))} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }}>
-                    <option>Pix</option><option>CartÃ£o</option><option>Dinheiro</option><option>TransferÃªncia</option><option>DÃ©bito</option>
+                  <select value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value as PaymentMethod }))} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }}>
+                    <option>Pix</option><option>Cartão de Crédito</option><option>Dinheiro</option><option>Transferência Bancária</option><option>Cartão de Débito</option>
                   </select>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export function Finances({ store }: FinancesProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" vertical={false} />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: number, name: string) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: any, name: any) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
               <Bar dataKey="receita" fill="#2d5016" radius={[3, 3, 0, 0]} />
               <Bar dataKey="despesa" fill="#c4882a" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -178,7 +178,7 @@ export function Finances({ store }: FinancesProps) {
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={60} dataKey="value" paddingAngle={2}>
                     {pieData.map((_, idx) => <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: number, _, props) => [`R$ ${val.toLocaleString("pt-BR")}`, props.payload.name]} />
+                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: any, _: any, props: any) => [`R$ ${val.toLocaleString("pt-BR")}`, props.payload.name]} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-1.5 mt-2">
@@ -241,3 +241,5 @@ export function Finances({ store }: FinancesProps) {
     </div>
   );
 }
+
+

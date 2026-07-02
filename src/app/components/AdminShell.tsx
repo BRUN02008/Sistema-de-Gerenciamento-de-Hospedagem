@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   LayoutDashboard, CalendarDays, BedDouble, ConciergeBell,
   DollarSign, Tag, BarChart3, Settings, LogOut,
-  Search, ChevronRight, ChevronDown, X
+  Search, ChevronRight, ChevronDown
 } from "lucide-react";
 import triboLogo from "../../imports/simbolo_do_tribo.jpeg";
 import type { Store } from "../store/useStore";

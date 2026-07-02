@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, BedDouble, DollarSign, ArrowUpRight, ArrowDownRight, CalendarDays, ConciergeBell, Tag, ArrowRight } from "lucide-react";
+import { TrendingUp, TrendingDown, BedDouble, DollarSign, ArrowDownRight, CalendarDays, ConciergeBell, Tag, ArrowRight } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import type { Store } from "../../store/useStore";
 
@@ -129,7 +129,7 @@ export function DashboardPage({ store, onNavigate }: DashboardPageProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.06)" />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(val: number, name: string) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(val: any, name: any) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
               <Area type="monotone" dataKey="receita" stroke="#2d5016" strokeWidth={2} fill="url(#gR)" name="receita" />
               <Area type="monotone" dataKey="despesa" stroke="#c4882a" strokeWidth={2} fill="url(#gD)" name="despesa" />
             </AreaChart>
@@ -146,7 +146,7 @@ export function DashboardPage({ store, onNavigate }: DashboardPageProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.06)" vertical={false} />
               <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} domain={[0, 100]} tickFormatter={v => `${v}%`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(v: number) => [`${v}%`, "Ocupação"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(v: any) => [`${v}%`, "Ocupação"]} />
               <Bar dataKey="taxa" fill="#1a2e14" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -215,3 +215,4 @@ export function DashboardPage({ store, onNavigate }: DashboardPageProps) {
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, X, Phone, Mail, DollarSign, Calendar } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Phone, Mail } from "lucide-react";
 import type { Store, Employee, EmployeeStatus } from "../../store/useStore";
 
 const STATUS_CFG: Record<EmployeeStatus, { label: string; bg: string; text: string }> = {

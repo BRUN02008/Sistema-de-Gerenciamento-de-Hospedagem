@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Wifi, Wind, Coffee, Users, X, Check, Trees, LogOut, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wifi, Wind, Coffee, Users, Check, Trees, LogOut, CalendarDays } from "lucide-react";
 import type { Store } from "../store/useStore";
 import { isRoomAvailable, getBlockedDates } from "../store/useStore";
 
@@ -206,8 +206,6 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
 
             <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
               {filteredRooms.map(room => {
-                const blocked = getBlockedDates(room.id, reservations);
-                const todayBlocked = blocked.includes(todayStr);
                 return (
                   <div key={room.id} className="rounded-2xl overflow-hidden cursor-pointer transition-all hover:shadow-lg"
                     style={{ background: "var(--card)", border: "1.5px solid var(--border)" }}
@@ -232,7 +230,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                           <Users size={12} /> {room.capacity} hóspedes
                         </div>
                         <div className="flex gap-1.5">
-                          {room.amenities.map(a => { const cfg = amenityIcons[a]; return cfg ? <cfg.icon key={a} size={13} style={{ color: "var(--muted-foreground)" }} title={cfg.label} /> : null; })}
+                          {room.amenities.map(a => { const cfg = amenityIcons[a]; return cfg ? <cfg.icon key={a} size={13} style={{ color: "var(--muted-foreground)" }} aria-label={cfg.label} /> : null; })}
                         </div>
                       </div>
                     </div>
@@ -476,3 +474,5 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
     </div>
   );
 }
+
+

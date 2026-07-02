@@ -108,7 +108,7 @@ export function PromotionsPage({ store }: { store: Store }) {
             {p.active ? "Desativar" : "Ativar"}
           </button>
           <button onClick={() => setModal(p)} className="py-1.5 px-3 rounded-lg" style={{ background: "#2d501612", color: "#2d5016" }}><Edit2 size={13} /></button>
-          <button onClick={() => deletePromotion(p.id, p.name)} className="py-1.5 px-3 rounded-lg" style={{ background: "#b9323212", color: "#b93232" }}><Trash2 size={13} /></button>
+          <button onClick={() => deletePromotion(p.id)} className="py-1.5 px-3 rounded-lg" style={{ background: "#b9323212", color: "#b93232" }}><Trash2 size={13} /></button>
         </div>
       </div>
     );

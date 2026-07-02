@@ -140,7 +140,7 @@ export function FinancesPage({ store }: { store: Store }) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.06)" vertical={false} />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(val: number, name: string) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Entrada" : "Saída"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(val: any, name: any) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Entrada" : "Saída"]} />
               <Bar dataKey="receita" fill="#2d5016" radius={[3, 3, 0, 0]} />
               <Bar dataKey="despesa" fill="#c4882a" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -157,7 +157,7 @@ export function FinancesPage({ store }: { store: Store }) {
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={32} outerRadius={56} dataKey="value" paddingAngle={2}>
                     {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 12 }} formatter={(val: number, _, p) => [`R$ ${val.toLocaleString("pt-BR")}`, p.payload.name]} />
+                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 12 }} formatter={(val: any, _: any, p: any) => [`R$ ${val.toLocaleString("pt-BR")}`, p.payload.name]} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-1.5 mt-2">
@@ -221,3 +221,5 @@ export function FinancesPage({ store }: { store: Store }) {
     </div>
   );
 }
+
+

@@ -58,15 +58,16 @@ function Calendar({
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
         ...classNames,
-      }}
+      } as React.ComponentProps<typeof DayPicker>["classNames"]}
       components={{
-        IconLeft: ({ className, ...props }) => (
+        Chevron: ({ className, orientation, ...props }: { className?: string; orientation?: "left" | "right" | "up" | "down" }) => (
+          orientation === "left" ? (
           <ChevronLeft className={cn("size-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
+          ) : (
           <ChevronRight className={cn("size-4", className)} {...props} />
+          )
         ),
-      }}
+      } as React.ComponentProps<typeof DayPicker>["components"]}
       {...props}
     />
   );

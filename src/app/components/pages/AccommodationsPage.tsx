@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, X, Users, Wifi, Wind, Coffee, Waves, Star, Check } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Users, Wifi, Wind, Coffee, Waves, Star, Check, BedDouble } from "lucide-react";
 import type { Store, Accommodation, AccommodationStatus } from "../../store/useStore";
 
 const STATUS_CFG: Record<AccommodationStatus, { label: string; bg: string; text: string }> = {
@@ -239,7 +239,7 @@ export function AccommodationsPage({ store }: { store: Store }) {
                 <div className="flex items-center gap-1.5 mb-3">
                   {acc.amenities.slice(0, 4).map(a => {
                     const cfg = AMENITY_ICONS[a];
-                    return cfg ? <cfg.icon key={a} size={13} style={{ color: "#7a7060" }} title={cfg.label} /> : null;
+                    return cfg ? <cfg.icon key={a} size={13} style={{ color: "#7a7060" }} aria-label={cfg.label} /> : null;
                   })}
                 </div>
                 <div className="flex gap-2">

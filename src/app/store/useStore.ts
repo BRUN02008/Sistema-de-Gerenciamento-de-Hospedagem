@@ -46,6 +46,8 @@ export interface Reservation {
   email: string;
   accommodationId: string;
   accommodationName: string;
+  roomId?: string;
+  roomName?: string;
   checkin: string;
   checkout: string;
   value: number;
@@ -282,6 +284,31 @@ export function isAccommodationAvailable(
   });
 }
 
+export const isRoomAvailable = isAccommodationAvailable;
+
+type NewReservationData = {
+  guest: string;
+  phone: string;
+  email: string;
+  accommodationId?: string;
+  accommodationName?: string;
+  roomId?: string;
+  roomName?: string;
+  checkin: string;
+  checkout: string;
+  value: number;
+  originalValue?: number;
+  packageId?: string;
+  packageName?: string;
+  packageValue?: number;
+  optionals?: ReservationOptional[];
+  discountPercent?: number;
+  discountAmount?: number;
+  guests: number;
+  paymentMethod?: PaymentMethod;
+  notes: string;
+};
+
 function syncAccStatus(accId: string, allReservations: Reservation[]): AccommodationStatus {
   const today = new Date().toISOString().slice(0, 10);
   const active = allReservations.filter(r => r.accommodationId === accId && r.status !== "cancelado");
@@ -330,15 +357,41 @@ export function useStore() {
   }, []);
 
   // ─── Reservations ───────────────────────────────────────────────────────────
-  const addReservation = useCallback((data: Omit<Reservation, "id" | "createdAt" | "status">) => {
-    const r: Reservation = { ...data, id: generateId("R"), status: "pendente", createdAt: new Date().toISOString() };
+  const addReservation = useCallback((data: NewReservationData) => {
+    const accommodationId = data.accommodationId ?? data.roomId ?? "";
+    const accommodationName = data.accommodationName ?? data.roomName ?? "";
+    const r: Reservation = {
+      guest: data.guest,
+      phone: data.phone,
+      email: data.email,
+      accommodationId,
+      accommodationName,
+      roomId: accommodationId,
+      roomName: accommodationName,
+      checkin: data.checkin,
+      checkout: data.checkout,
+      value: data.value,
+      originalValue: data.originalValue ?? data.value,
+      packageId: data.packageId ?? "PKG-001",
+      packageName: data.packageName ?? "Pacote 1",
+      packageValue: data.packageValue ?? 500,
+      optionals: data.optionals ?? [],
+      discountPercent: data.discountPercent ?? 0,
+      discountAmount: data.discountAmount ?? 0,
+      guests: data.guests,
+      paymentMethod: data.paymentMethod ?? "Pix",
+      notes: data.notes,
+      id: generateId("R"),
+      status: "pendente",
+      createdAt: new Date().toISOString(),
+    };
     setReservationsRaw(prev => { const u = [r, ...prev]; save("tribo_v4_reservations", u); return u; });
     setAccommodationsRaw(prev => {
-      const updated = prev.map(a => a.id !== data.accommodationId || a.status === "manutenção" ? a : { ...a, status: "reservado" as AccommodationStatus });
+      const updated = prev.map(a => a.id !== accommodationId || a.status === "manutenção" ? a : { ...a, status: "reservado" as AccommodationStatus });
       save("tribo_v4_accommodations", updated);
       return updated;
     });
-    addHistory({ action: "Reserva criada", description: `${data.guest} — ${data.accommodationName} | ${data.packageName}`, type: "reservation", entityId: r.id });
+    addHistory({ action: "Reserva criada", description: `${data.guest} — ${accommodationName} | ${r.packageName}`, type: "reservation", entityId: r.id });
     return r;
   }, [addHistory]);
 
@@ -346,13 +399,15 @@ export function useStore() {
     setReservationsRaw(prev => { const u = prev.map(r => r.id === id ? { ...r, ...changes } : r); save("tribo_v4_reservations", u); return u; });
   }, []);
 
-  const cancelReservation = useCallback((id: string, accId: string, guest: string, acc: string) => {
+  const cancelReservation = useCallback((id: string, guest: string, acc: string, accId?: string) => {
     setReservationsRaw(prev => {
+      const target = prev.find(r => r.id === id);
+      const targetAccId = accId ?? target?.accommodationId ?? target?.roomId ?? "";
       const updated = prev.map(r => r.id === id ? { ...r, status: "cancelado" as ReservationStatus } : r);
       save("tribo_v4_reservations", updated);
       setAccommodationsRaw(accPrev => {
-        const s = syncAccStatus(accId, updated);
-        const u = accPrev.map(a => a.id === accId && a.status !== "manutenção" ? { ...a, status: s } : a);
+        const s = syncAccStatus(targetAccId, updated);
+        const u = accPrev.map(a => a.id === targetAccId && a.status !== "manutenção" ? { ...a, status: s } : a);
         save("tribo_v4_accommodations", u);
         return u;
       });
@@ -379,23 +434,26 @@ export function useStore() {
     addHistory({ action: "Reserva excluída", description: `${guest} — ${acc}`, type: "reservation", entityId: id });
   }, [addHistory]);
 
-  const checkinReservation = useCallback((id: string, g: string, a: string, accId: string) => {
+  const checkinReservation = useCallback((id: string, g: string, a: string, accId?: string) => {
+    const targetAccId = accId ?? reservations.find(r => r.id === id)?.accommodationId ?? "";
     updateReservation(id, { status: "hospedado" });
     setAccommodationsRaw(prev => {
-      const u = prev.map(acc => acc.id === accId && acc.status !== "manutenção" ? { ...acc, status: "ocupado" as AccommodationStatus } : acc);
+      const u = prev.map(acc => acc.id === targetAccId && acc.status !== "manutenção" ? { ...acc, status: "ocupado" as AccommodationStatus } : acc);
       save("tribo_v4_accommodations", u);
       return u;
     });
     addHistory({ action: "Check-in realizado", description: `${g} — ${a}`, type: "reservation", entityId: id });
-  }, [updateReservation, addHistory]);
+  }, [reservations, updateReservation, addHistory]);
 
-  const checkoutReservation = useCallback((id: string, g: string, a: string, accId: string) => {
+  const checkoutReservation = useCallback((id: string, g: string, a: string, accId?: string) => {
     setReservationsRaw(prev => {
+      const target = prev.find(r => r.id === id);
+      const targetAccId = accId ?? target?.accommodationId ?? target?.roomId ?? "";
       const updated = prev.map(r => r.id === id ? { ...r, status: "confirmado" as ReservationStatus } : r);
       save("tribo_v4_reservations", updated);
       setAccommodationsRaw(accPrev => {
-        const s = syncAccStatus(accId, updated);
-        const u = accPrev.map(acc => acc.id === accId && acc.status !== "manutenção" ? { ...acc, status: s } : acc);
+        const s = syncAccStatus(targetAccId, updated);
+        const u = accPrev.map(acc => acc.id === targetAccId && acc.status !== "manutenção" ? { ...acc, status: s } : acc);
         save("tribo_v4_accommodations", u);
         return u;
       });
@@ -496,7 +554,7 @@ export function useStore() {
   }, []);
 
   return {
-    accommodations, reservations, transactions, employees, services, promotions, packages, history,
+    accommodations, rooms: accommodations, reservations, transactions, employees, services, promotions, packages, history,
     addReservation, updateReservation, deleteReservation, cancelReservation, checkinReservation, checkoutReservation,
     addAccommodation, updateAccommodation, deleteAccommodation,
     addEmployee, updateEmployee, deleteEmployee,
@@ -509,3 +567,5 @@ export function useStore() {
 }
 
 export type Store = ReturnType<typeof useStore>;
+
+

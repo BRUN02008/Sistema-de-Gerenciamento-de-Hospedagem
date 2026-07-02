@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Trees, Wifi, Coffee, Car, Star, MapPin, Phone, Mail,
-  Instagram, Facebook, ChevronDown, ArrowRight, Shield,
+  Camera, Send, ChevronDown, ArrowRight, Shield,
   Users, Leaf, Moon, Sunrise, Wind, Menu, X as XIcon
 } from "lucide-react";
 import type { Store } from "../store/useStore";
@@ -541,7 +541,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
             <div>
               <div style={{ fontSize: "0.72rem", color: "#c4882a", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>Redes Sociais</div>
               <div className="flex gap-3 mb-5">
-                {[Instagram, Facebook].map((Icon, i) => (
+                {[Camera, Send].map((Icon, i) => (
                   <a key={i} href="#" className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(247,244,239,0.6)" }}>
                     <Icon size={17} />
                   </a>
