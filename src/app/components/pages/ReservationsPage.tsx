@@ -115,7 +115,7 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
           <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600, fontSize: "1.1rem" }}>
             {reservation ? "Editar Reserva" : "Nova Reserva"}
           </h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
+          <button aria-label="Fechar" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
         </div>
 
         <div className="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-5">
@@ -126,7 +126,7 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
             <div className="grid grid-cols-2 gap-3">
               <div style={{ gridColumn: "1/-1" }}>
                 <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Nome completo *</label>
-                <input value={form.guest} onChange={e => { setForm(f => ({ ...f, guest: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                <input aria-label="Nome completo" value={form.guest} onChange={e => { setForm(f => ({ ...f, guest: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
               </div>
               {[
                 { label: "Telefone", key: "phone", type: "text" },
@@ -136,13 +136,13 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
                 { label: "Nº de Hóspedes", key: "guests", type: "number" },
               ].map(({ label, key, type }) => (
                 <div key={key}>
-                  <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>{label}</label>
-                  <input type={type} value={form[key as keyof ModalForm] as string} onChange={e => { setForm(f => ({ ...f, [key]: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                  <label  style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>{label}</label>
+                  <input aria-label={label} type={type} value={form[key as keyof ModalForm] as string} onChange={e => { setForm(f => ({ ...f, [key]: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
                 </div>
               ))}
               <div>
                 <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Acomodação *</label>
-                <select value={form.accommodationId} onChange={e => { setForm(f => ({ ...f, accommodationId: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                <select aria-label="Acomodação" value={form.accommodationId} onChange={e => { setForm(f => ({ ...f, accommodationId: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
                   {accommodations.filter(a => a.status !== "manutenção").map(a => (
                     <option key={a.id} value={a.id}>{a.name} ({a.status})</option>
                   ))}
@@ -150,7 +150,7 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
               </div>
               <div>
                 <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Pagamento</label>
-                <select value={form.paymentMethod} onChange={e => setForm(f => ({ ...f, paymentMethod: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                <select aria-label="Método de Pagamento" value={form.paymentMethod} onChange={e => setForm(f => ({ ...f, paymentMethod: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
                   {PAYMENT_METHODS.map(m => <option key={m}>{m}</option>)}
                 </select>
               </div>
@@ -168,6 +168,7 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
                 return (
                   <button key={pkg.id} type="button" onClick={() => setForm(f => ({ ...f, packageId: pkg.id }))}
                     className="flex items-start gap-4 px-4 py-3.5 rounded-2xl text-left transition-all"
+                    aria-label={`Selecionar pacote: ${pkg.name}`}
                     style={{ background: sel ? "#1a2e14" : "#f0ead8", border: `2px solid ${sel ? "#1a2e14" : "rgba(44,35,18,0.1)"}` }}>
                     <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5" style={{ borderColor: sel ? "#d4a84b" : "#7a7060" }}>
                       {sel && <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#d4a84b" }} />}
@@ -216,7 +217,7 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
                   : `R$ ${item.value} por ${item.quantityLabel || "serviço"}`;
                 return (
                   <div key={item.id}>
-                    <button type="button" onClick={() => toggleOptional(item.id)}
+                    <button aria-label={`Selecionar serviço: ${item.name}`} type="button" onClick={() => toggleOptional(item.id)}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors"
                       style={{ background: selected ? "#2d501612" : "#f0ead8", border: `1.5px solid ${selected ? "#2d501640" : "transparent"}` }}>
                       <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
@@ -237,13 +238,13 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
                           <div className="flex items-center gap-2">
                             <span style={{ fontSize: "0.75rem", color: "#7a7060" }}>Qtd ({item.quantityLabel}):</span>
                             <div className="flex items-center gap-2">
-                              <button type="button" onClick={() => setOptQty(item.id, selected.qty - 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Minus size={11} /></button>
+                              <button aria-label="Diminuir quantidade" type="button" onClick={() => setOptQty(item.id, selected.qty - 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Minus size={11} /></button>
                               <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.9rem", fontWeight: 600, minWidth: 20, textAlign: "center" }}>{selected.qty}</span>
-                              <button type="button" onClick={() => setOptQty(item.id, selected.qty + 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Plus size={11} /></button>
+                              <button aria-label="Aumentar quantidade" type="button" onClick={() => setOptQty(item.id, selected.qty + 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Plus size={11} /></button>
                             </div>
                           </div>
                         )}
-                        <input placeholder="Observação (opcional)" value={selected.notes}
+                        <input aria-label="Observação (opcional)" placeholder="Observação (opcional)" value={selected.notes}
                           onChange={e => setForm(f => ({ ...f, optionals: f.optionals.map(o => o.id === item.id ? { ...o, notes: e.target.value } : o) }))}
                           className="flex-1 px-3 py-1.5 rounded-lg outline-none" style={{ background: "#ede8df", border: "none", fontSize: "0.8rem", minWidth: 140 }} />
                       </div>
@@ -271,7 +272,7 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
           {/* 5. Observações */}
           <section>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Observações gerais</label>
-            <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input aria-label="Observações gerais" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </section>
 
           {/* Resumo de valor */}
@@ -432,8 +433,8 @@ export function ReservationsPage({ store }: { store: Store }) {
                   </td>
                   <td className="px-3 py-3">
                     <div className="flex gap-1.5">
-                      <button onClick={e => { e.stopPropagation(); setModal(r); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#2d501615", color: "#2d5016" }}><Edit2 size={12} /></button>
-                      <button onClick={e => { e.stopPropagation(); deleteReservation(r.id, r.guest, r.accommodationName); if (selectedId === r.id) setSelectedId(null); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323215", color: "#b93232" }}><Trash2 size={12} /></button>
+                      <button aria-label="Editar reserva" onClick={e => { e.stopPropagation(); setModal(r); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#2d501615", color: "#2d5016" }}><Edit2 size={12} /></button>
+                      <button aria-label="Excluir reserva" onClick={e => { e.stopPropagation(); deleteReservation(r.id, r.guest, r.accommodationName); if (selectedId === r.id) setSelectedId(null); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323215", color: "#b93232" }}><Trash2 size={12} /></button>
                     </div>
                   </td>
                 </tr>
@@ -447,8 +448,8 @@ export function ReservationsPage({ store }: { store: Store }) {
           <div className="flex items-center justify-between mb-5">
             <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>{MONTHS[month]} {year}</h3>
             <div className="flex gap-2">
-              <button onClick={() => setCalDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronLeft size={15} /></button>
-              <button onClick={() => setCalDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronRight size={15} /></button>
+              <button aria-label="Mês anterior" onClick={() => setCalDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronLeft size={15} /></button>
+              <button aria-label="Próximo mês" onClick={() => setCalDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronRight size={15} /></button>
             </div>
           </div>
           <div className="grid grid-cols-7 gap-1 mb-1">
@@ -482,7 +483,7 @@ export function ReservationsPage({ store }: { store: Store }) {
         <div className="fixed inset-y-0 right-0 w-80 z-40 flex flex-col" style={{ background: "#fdfaf5", borderLeft: "1px solid rgba(44,35,18,0.1)", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)" }}>
           <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "rgba(44,35,18,0.08)" }}>
             <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>{selected.guest.split(" ")[0]}</h3>
-            <button onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={13} /></button>
+            <button aria-label="Fechar detalhes" onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={13} /></button>
           </div>
           <div className="flex-1 px-5 py-4 overflow-y-auto flex flex-col gap-3">
             <div>

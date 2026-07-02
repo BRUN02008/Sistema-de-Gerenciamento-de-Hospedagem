@@ -36,7 +36,7 @@ function AccommodationModal({ mode, accommodation, onSave, onClose }: {
         <div className="rounded-2xl w-full max-w-lg overflow-hidden" style={{ background: "#fdfaf5" }}>
           <div className="h-48 overflow-hidden relative">
             <img src={accommodation.image} alt={accommodation.name} className="w-full h-full object-cover" />
-            <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <button aria-label="Fechar" onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
               <X size={14} style={{ color: "#fff" }} />
             </button>
             <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full" style={{ fontSize: "0.7rem", background: sc.bg, color: sc.text, fontWeight: 700, backdropFilter: "blur(4px)" }}>
@@ -69,7 +69,7 @@ function AccommodationModal({ mode, accommodation, onSave, onClose }: {
                 );
               })}
             </div>
-            <button onClick={onClose} className="w-full mt-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>
+            <button aria-label="Fechar" onClick={onClose} className="w-full mt-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>
               Fechar
             </button>
           </div>
@@ -89,40 +89,40 @@ function AccommodationModal({ mode, accommodation, onSave, onClose }: {
           <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>
             {mode === "add" ? "Nova Acomodação" : "Editar Acomodação"}
           </h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
+          <button aria-label="Fechar" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Nome *</label>
-            <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }} />
+            <input aria-label="Nome da acomodação" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }} />
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Tipo</label>
-            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as Accommodation["type"] }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
+            <select aria-label="Tipo da acomodação" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as Accommodation["type"] }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
               <option>Cabana</option><option>Chalé</option><option>Suíte</option>
             </select>
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Status</label>
-            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as AccommodationStatus }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
+            <select aria-label="Status da acomodação" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as AccommodationStatus }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
               <option value="disponível">Livre</option><option value="ocupado">Ocupado</option><option value="reservado">Reservado</option><option value="manutenção">Manutenção</option>
             </select>
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Capacidade</label>
-            <input type="number" value={form.capacity} onChange={e => setForm(f => ({ ...f, capacity: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input aria-label="Capacidade da acomodação" type="number" value={form.capacity} onChange={e => setForm(f => ({ ...f, capacity: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Diária (R$)</label>
-            <input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input aria-label="Preço da diária" type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>URL da Foto</label>
-            <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input aria-label="URL da foto" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Descrição</label>
-            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-3 py-2.5 rounded-xl outline-none resize-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <textarea aria-label="Descrição da acomodação" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-3 py-2.5 rounded-xl outline-none resize-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-2" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Comodidades</label>
@@ -243,13 +243,13 @@ export function AccommodationsPage({ store }: { store: Store }) {
                   })}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setModal({ mode: "view", acc })} className="flex-1 py-1.5 rounded-lg" style={{ background: "#1a2e1410", color: "#1a2e14", fontSize: "0.78rem", fontWeight: 500 }}>
+                  <button aria-label="Ver detalhes" onClick={() => setModal({ mode: "view", acc })} className="flex-1 py-1.5 rounded-lg" style={{ background: "#1a2e1410", color: "#1a2e14", fontSize: "0.78rem", fontWeight: 500 }}>
                     Detalhes
                   </button>
-                  <button onClick={() => setModal({ mode: "edit", acc })} className="py-1.5 px-3 rounded-lg" style={{ background: "#2d501615", color: "#2d5016", fontSize: "0.78rem" }}>
+                  <button aria-label="Editar acomodação" onClick={() => setModal({ mode: "edit", acc })} className="py-1.5 px-3 rounded-lg" style={{ background: "#2d501615", color: "#2d5016", fontSize: "0.78rem" }}>
                     <Edit2 size={13} />
                   </button>
-                  <button onClick={() => deleteAccommodation(acc.id, acc.name)} className="py-1.5 px-3 rounded-lg" style={{ background: "#b9323215", color: "#b93232", fontSize: "0.78rem" }}>
+                  <button aria-label="Excluir acomodação" onClick={() => deleteAccommodation(acc.id, acc.name)} className="py-1.5 px-3 rounded-lg" style={{ background: "#b9323215", color: "#b93232", fontSize: "0.78rem" }}>
                     <Trash2 size={13} />
                   </button>
                 </div>

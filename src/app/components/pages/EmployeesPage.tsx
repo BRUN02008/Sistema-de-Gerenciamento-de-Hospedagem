@@ -21,7 +21,7 @@ function EmployeeModal({ employee, onSave, onClose }: { employee?: Employee; onS
       <div className="rounded-2xl w-full max-w-md p-6" style={{ background: "#fdfaf5" }}>
         <div className="flex items-center justify-between mb-5">
           <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>{employee ? "Editar Funcionário" : "Novo Funcionário"}</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
+          <button aria-label="Fechar" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
         </div>
         <div className="grid grid-cols-2 gap-4">
           {[
@@ -33,26 +33,26 @@ function EmployeeModal({ employee, onSave, onClose }: { employee?: Employee; onS
           ].map(({ label, key, type, col }) => (
             <div key={key} style={{ gridColumn: col === "2" ? "1/-1" : "auto" }}>
               <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>{label}</label>
-              <input type={type} value={form[key as keyof typeof form] as string} onChange={e => setForm(f => ({ ...f, [key]: type === "number" ? +e.target.value : e.target.value }))}
+              <input aria-label={label} type={type} value={form[key as keyof typeof form] as string} onChange={e => setForm(f => ({ ...f, [key]: type === "number" ? +e.target.value : e.target.value }))}
                 className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
             </div>
           ))}
           <div>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Cargo</label>
-            <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+            <select aria-label="Cargo" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
               {ROLES.map(r => <option key={r}>{r}</option>)}
             </select>
           </div>
           <div>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Status</label>
-            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as EmployeeStatus }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+            <select aria-label="Status" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as EmployeeStatus }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
               <option value="ativo">Ativo</option><option value="inativo">Inativo</option><option value="férias">Férias</option>
             </select>
           </div>
         </div>
         <div className="flex gap-3 mt-4">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem" }}>Cancelar</button>
-          <button onClick={() => { onSave(form); onClose(); }} className="flex-1 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>
+          <button aria-label="Cancelar" onClick={onClose} className="flex-1 py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem" }}>Cancelar</button>
+          <button aria-label="Salvar" onClick={() => { onSave(form); onClose(); }} className="flex-1 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>
             {employee ? "Salvar" : "Adicionar"}
           </button>
         </div>
@@ -140,8 +140,8 @@ export function EmployeesPage({ store }: { store: Store }) {
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex gap-2">
-                    <button onClick={() => setModal(emp)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#2d501615", color: "#2d5016" }}><Edit2 size={12} /></button>
-                    <button onClick={() => deleteEmployee(emp.id, emp.name)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323215", color: "#b93232" }}><Trash2 size={12} /></button>
+                    <button aria-label="Editar funcionário" onClick={() => setModal(emp)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#2d501615", color: "#2d5016" }}><Edit2 size={12} /></button>
+                    <button aria-label="Excluir funcionário" onClick={() => deleteEmployee(emp.id, emp.name)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323215", color: "#b93232" }}><Trash2 size={12} /></button>
                   </div>
                 </td>
               </tr>

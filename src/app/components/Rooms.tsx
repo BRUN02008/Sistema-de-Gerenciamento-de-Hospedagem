@@ -134,7 +134,7 @@ export function Rooms({ store }: RoomsProps) {
         <div className="fixed inset-y-0 right-0 w-80 shadow-2xl flex flex-col z-40" style={{ background: "var(--card)", borderLeft: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
             <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>{selected.name}</h3>
-            <button onClick={() => setSelected(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={14} /></button>
+            <button aria-label="Fechar detalhes" onClick={() => setSelected(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={14} /></button>
           </div>
           <div className="h-44 overflow-hidden">
             <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" />

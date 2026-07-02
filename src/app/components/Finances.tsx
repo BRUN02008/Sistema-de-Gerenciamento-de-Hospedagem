@@ -82,30 +82,30 @@ export function Finances({ store }: FinancesProps) {
               </div>
               <div>
                 <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>Descri√ß√£o *</label>
-                <input value={newTx.description} onChange={e => { setNewTx(f => ({ ...f, description: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }} />
+                <input aria-label="Descri√ß√£o" value={newTx.description} onChange={e => { setNewTx(f => ({ ...f, description: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>Valor (R$) *</label>
-                  <input type="number" value={newTx.value} onChange={e => { setNewTx(f => ({ ...f, value: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }} />
+                  <input aria-label="Valor" type="number" value={newTx.value} onChange={e => { setNewTx(f => ({ ...f, value: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }} />
                 </div>
                 <div>
                   <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>Pagamento</label>
-                  <select value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value as PaymentMethod }))} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }}>
-                    <option>Pix</option><option>Cart„o de CrÈdito</option><option>Dinheiro</option><option>TransferÍncia Banc·ria</option><option>Cart„o de DÈbito</option>
+                  <select aria-label="M√©todo de pagamento" value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value as PaymentMethod }))} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }}>
+                    <option>Pix</option><option>Carto de Credito</option><option>Dinheiro</option><option>Transferncia Bancria</option><option>Carto de DDbito</option>
                   </select>
                 </div>
               </div>
               <div>
                 <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>Categoria</label>
-                <select value={newTx.category} onChange={e => setNewTx(f => ({ ...f, category: e.target.value }))} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }}>
+                <select aria-label="Categoria" value={newTx.category} onChange={e => setNewTx(f => ({ ...f, category: e.target.value }))} className="w-full px-3 py-2.5 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }}>
                   <option>Hospedagem</option><option>Eventos</option><option>Alimenta√ß√£o</option><option>Pessoal</option><option>Manuten√ß√£o</option><option>Utilidades</option><option>Outros</option>
                 </select>
               </div>
               {formError && <div className="px-3 py-2 rounded-lg" style={{ background: "#b9323215", color: "#b93232", fontSize: "0.8rem" }}>{formError}</div>}
               <div className="flex gap-3 mt-1">
-                <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-xl" style={{ background: "var(--muted)", fontSize: "0.875rem", color: "var(--foreground)" }}>Cancelar</button>
-                <button onClick={handleSaveTx} className="flex-1 py-2.5 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.875rem" }}>Salvar</button>
+                <button aria-label="Cancelar" onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-xl" style={{ background: "var(--muted)", fontSize: "0.875rem", color: "var(--foreground)" }}>Cancelar</button>
+                <button aria-label="Salvar" onClick={handleSaveTx} className="flex-1 py-2.5 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.875rem" }}>Salvar</button>
               </div>
             </div>
           </div>

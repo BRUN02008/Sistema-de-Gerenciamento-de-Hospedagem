@@ -148,6 +148,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
           {/* Right side */}
           <div className="flex items-center gap-3">
             <button
+              aria-label="Iniciar reserva"
               onClick={onStartBooking}
               className="hidden md:flex items-center gap-2 px-5 py-2 rounded-full transition-all"
               style={{ background: "#c4882a", color: "#1a2e14", fontSize: "0.875rem", fontWeight: 600 }}
@@ -166,7 +167,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
             </button>
 
             {/* Mobile menu button */}
-            <button className="md:hidden" onClick={() => setMobileMenu(!mobileMenu)} style={{ color: "#f7f4ef", background: "none", border: "none", cursor: "pointer" }}>
+            <button aria-label="Menu" className="md:hidden" onClick={() => setMobileMenu(!mobileMenu)} style={{ color: "#f7f4ef", background: "none", border: "none", cursor: "pointer" }}>
               {mobileMenu ? <XIcon size={22} /> : <Menu size={22} />}
             </button>
           </div>
@@ -176,11 +177,11 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
         {mobileMenu && (
           <div className="md:hidden border-t px-6 py-4 flex flex-col gap-3" style={{ background: "rgba(26,46,20,0.98)", borderColor: "rgba(196,136,42,0.2)" }}>
             {navLinks.map(({ id, label }) => (
-              <button key={id} onClick={() => scrollToSection(id as SectionId)} className="text-left py-2" style={{ fontSize: "0.95rem", color: "#f7f4ef", background: "none", border: "none", cursor: "pointer" }}>
+              <button key={id} aria-label={label} onClick={() => scrollToSection(id as SectionId)} className="text-left py-2" style={{ fontSize: "0.95rem", color: "#f7f4ef", background: "none", border: "none", cursor: "pointer" }}>
                 {label}
               </button>
             ))}
-            <button onClick={onStartBooking} className="mt-2 py-2.5 rounded-full" style={{ background: "#c4882a", color: "#1a2e14", fontSize: "0.9rem", fontWeight: 600 }}>
+            <button aria-label="Iniciar reserva" onClick={onStartBooking} className="mt-2 py-2.5 rounded-full" style={{ background: "#c4882a", color: "#1a2e14", fontSize: "0.9rem", fontWeight: 600 }}>
               Reservar Agora
             </button>
           </div>
@@ -218,6 +219,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
 
             <div className="flex items-center justify-center gap-4 flex-wrap">
               <button
+                aria-label="Iniciar reserva"
                 onClick={onStartBooking}
                 className="flex items-center gap-2 px-8 py-3.5 rounded-full transition-all"
                 style={{ background: "#c4882a", color: "#1a2e14", fontSize: "1rem", fontWeight: 700 }}
@@ -225,6 +227,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
                 Reservar Agora <ArrowRight size={18} />
               </button>
               <button
+                aria-label="Ver acomodações"
                 onClick={() => scrollToSection("acomodacoes")}
                 className="flex items-center gap-2 px-8 py-3.5 rounded-full"
                 style={{ background: "rgba(247,244,239,0.12)", border: "1.5px solid rgba(247,244,239,0.4)", color: "#f7f4ef", fontSize: "1rem" }}
@@ -248,6 +251,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
             <div className="flex items-center gap-2 flex-1 min-w-44 px-4 py-2.5 rounded-xl" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(196,136,42,0.25)" }}>
               <span style={{ fontSize: "0.7rem", color: "#c4882a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>Check-in</span>
               <input
+                aria-label="Check-in"
                 type="date"
                 value={checkin}
                 onChange={e => setCheckin(e.target.value)}
@@ -259,6 +263,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
             <div className="flex items-center gap-2 flex-1 min-w-44 px-4 py-2.5 rounded-xl" style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(196,136,42,0.25)" }}>
               <span style={{ fontSize: "0.7rem", color: "#c4882a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>Check-out</span>
               <input
+                aria-label="Check-out"
                 type="date"
                 value={checkout}
                 onChange={e => setCheckout(e.target.value)}
@@ -271,6 +276,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
               <Users size={14} style={{ color: "#c4882a", flexShrink: 0 }} />
               <span style={{ fontSize: "0.7rem", color: "#c4882a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>Hóspedes</span>
               <select
+                aria-label="Número de hóspedes"
                 value={guestCount}
                 onChange={e => setGuestCount(e.target.value)}
                 className="flex-1 outline-none bg-transparent"
@@ -281,6 +287,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
             </div>
             <button
               type="submit"
+              aria-label="Buscar disponibilidade"
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all"
               style={{ background: "#c4882a", color: "#1a2e14", fontSize: "0.9rem", fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}
             >

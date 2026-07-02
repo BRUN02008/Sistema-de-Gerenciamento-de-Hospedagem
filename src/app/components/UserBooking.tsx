@@ -245,7 +245,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
         {step === "dates" && selectedRoom && (
           <>
             <div className="flex items-center gap-3 mb-6">
-              <button onClick={() => { setStep("rooms"); setCheckin(null); setCheckout(null); }} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted-foreground)" }}>
+              <button aria-label="Voltar" onClick={() => { setStep("rooms"); setCheckin(null); setCheckout(null); }} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted-foreground)" }}>
                 <ChevronLeft size={20} />
               </button>
               <div>
@@ -260,10 +260,10 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                 <div className="flex items-center justify-between mb-4">
                   <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>{months[calMonth]} {calYear}</h3>
                   <div className="flex gap-2">
-                    <button onClick={() => setCalDate(new Date(calYear, calMonth - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}>
+                    <button aria-label="Mês anterior" onClick={() => setCalDate(new Date(calYear, calMonth - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}>
                       <ChevronLeft size={16} />
                     </button>
-                    <button onClick={() => setCalDate(new Date(calYear, calMonth + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}>
+                    <button aria-label="Próximo mês" onClick={() => setCalDate(new Date(calYear, calMonth + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}>
                       <ChevronRight size={16} />
                     </button>
                   </div>
@@ -363,7 +363,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
         {step === "form" && selectedRoom && checkin && checkout && (
           <>
             <div className="flex items-center gap-3 mb-6">
-              <button onClick={() => setStep("dates")} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted-foreground)" }}>
+              <button aria-label="Voltar" onClick={() => setStep("dates")} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted-foreground)" }}>
                 <ChevronLeft size={20} />
               </button>
               <div>
@@ -422,7 +422,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                     </div>
                   </div>
                 </div>
-                <button onClick={handleConfirm} className="w-full py-3 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.9rem", fontWeight: 500 }}>
+                <button aria-label="Confirmar reserva" onClick={handleConfirm} className="w-full py-3 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.9rem", fontWeight: 500 }}>
                   Confirmar Reserva
                 </button>
                 <p style={{ fontSize: "0.72rem", color: "var(--muted-foreground)", textAlign: "center" }}>
@@ -464,7 +464,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                   ))}
                 </div>
               </div>
-              <button onClick={reset} className="px-8 py-3 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.9rem" }}>
+              <button aria-label="Fazer nova reserva" onClick={reset} className="px-8 py-3 rounded-xl" style={{ background: "var(--primary)", color: "var(--primary-foreground)", fontSize: "0.9rem" }}>
                 Fazer nova reserva
               </button>
             </div>

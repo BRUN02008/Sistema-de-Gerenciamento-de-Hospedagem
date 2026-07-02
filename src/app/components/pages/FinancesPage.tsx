@@ -54,14 +54,14 @@ export function FinancesPage({ store }: { store: Store }) {
           <div className="rounded-2xl w-full max-w-md p-6" style={{ background: "#fdfaf5" }}>
             <div className="flex items-center justify-between mb-5">
               <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>Nova Transação</h2>
-              <button onClick={() => setModal(false)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
+              <button aria-label="Fechar" onClick={() => setModal(false)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
                 <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 8 }}>Tipo</label>
                 <div className="flex gap-2">
                   {(["receita", "despesa"] as const).map(t => (
-                    <button key={t} type="button" onClick={() => setNewTx(f => ({ ...f, type: t, category: (t === "receita" ? REVENUE_CATEGORIES : EXPENSE_CATEGORIES)[0] }))} className="flex-1 py-2.5 rounded-xl flex items-center justify-center gap-2" style={{ background: newTx.type === t ? (t === "receita" ? "#2d5016" : "#b93232") : "#ede8df", color: newTx.type === t ? "#f7f4ef" : "#7a7060", fontSize: "0.875rem" }}>
+                    <button key={t} type="button" aria-label={t === "receita" ? "Receita" : "Despesa"} onClick={() => setNewTx(f => ({ ...f, type: t, category: (t === "receita" ? REVENUE_CATEGORIES : EXPENSE_CATEGORIES)[0] }))} className="flex-1 py-2.5 rounded-xl flex items-center justify-center gap-2" style={{ background: newTx.type === t ? (t === "receita" ? "#2d5016" : "#b93232") : "#ede8df", color: newTx.type === t ? "#f7f4ef" : "#7a7060", fontSize: "0.875rem" }}>
                       {t === "receita" ? <ArrowUpRight size={15} /> : <ArrowDownRight size={15} />} {t === "receita" ? "Receita" : "Despesa"}
                     </button>
                   ))}
@@ -69,30 +69,30 @@ export function FinancesPage({ store }: { store: Store }) {
               </div>
               <div>
                 <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Descrição *</label>
-                <input value={newTx.description} onChange={e => { setNewTx(f => ({ ...f, description: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                <input aria-label="Descrição" value={newTx.description} onChange={e => { setNewTx(f => ({ ...f, description: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
               </div>
               <div>
                 <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Categoria</label>
-                <select value={newTx.category} onChange={e => setNewTx(f => ({ ...f, category: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                <select aria-label="Categoria" value={newTx.category} onChange={e => setNewTx(f => ({ ...f, category: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
                   {currentCategories.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Valor (R$) *</label>
-                  <input type="number" value={newTx.value} onChange={e => { setNewTx(f => ({ ...f, value: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                  <input aria-label="Valor" type="number" value={newTx.value} onChange={e => { setNewTx(f => ({ ...f, value: e.target.value })); setFormError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
                 </div>
                 <div>
                   <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Forma de Pagamento</label>
-                  <select value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value as PaymentMethod }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                  <select aria-label="Forma de Pagamento" value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value as PaymentMethod }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
                     {PAYMENT_METHODS.map(m => <option key={m}>{m}</option>)}
                   </select>
                 </div>
               </div>
               {formError && <div className="px-3 py-2 rounded-lg" style={{ background: "#b9323212", color: "#b93232", fontSize: "0.8rem" }}>{formError}</div>}
               <div className="flex gap-3">
-                <button onClick={() => setModal(false)} className="flex-1 py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem" }}>Cancelar</button>
-                <button onClick={handleSave} className="flex-1 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>Registrar</button>
+                <button aria-label="Cancelar" onClick={() => setModal(false)} className="flex-1 py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem" }}>Cancelar</button>
+                <button aria-label="Registrar" onClick={handleSave} className="flex-1 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>Registrar</button>
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@ export function FinancesPage({ store }: { store: Store }) {
                   </div>
                 </td>
                 <td className="px-5 py-3">
-                  <button onClick={() => deleteTransaction(t.id)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323212", color: "#b93232" }}><Trash2 size={12} /></button>
+                  <button aria-label="Excluir transação" onClick={() => deleteTransaction(t.id)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323212", color: "#b93232" }}><Trash2 size={12} /></button>
                 </td>
               </tr>
             ))}

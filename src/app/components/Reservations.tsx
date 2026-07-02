@@ -60,7 +60,7 @@ function NewReservationModal({ store, onClose }: { store: Store; onClose: () => 
       <div className="rounded-2xl w-full max-w-lg p-6" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
         <div className="flex items-center justify-between mb-5">
           <h2 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Nova Reserva</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={15} /></button>
+          <button aria-label="Fechar" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={15} /></button>
         </div>
         <div className="grid grid-cols-2 gap-4">
           {[
@@ -73,20 +73,20 @@ function NewReservationModal({ store, onClose }: { store: Store; onClose: () => 
           ].map(({ label, key, type, col }) => (
             <div key={key} style={{ gridColumn: col === "2" ? "1 / -1" : "auto" }}>
               <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>{label}</label>
-              <input type={type} value={form[key as keyof typeof form]} onChange={e => { setForm(f => ({ ...f, [key]: e.target.value })); setError(""); }}
+              <input aria-label={label} type={type} value={form[key as keyof typeof form]} onChange={e => { setForm(f => ({ ...f, [key]: e.target.value })); setError(""); }}
                 className="w-full px-3 py-2 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }} />
             </div>
           ))}
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>Quarto *</label>
-            <select value={form.roomId} onChange={e => setForm(f => ({ ...f, roomId: e.target.value }))}
+            <select aria-label="Quarto" value={form.roomId} onChange={e => setForm(f => ({ ...f, roomId: e.target.value }))}
               className="w-full px-3 py-2 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }}>
               {rooms.map(r => <option key={r.id} value={r.id}>{r.name} — R$ {r.price}/noite</option>)}
             </select>
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={{ fontSize: "0.78rem", color: "var(--muted-foreground)", fontWeight: 500, display: "block", marginBottom: 5 }}>Observações</label>
-            <input type="text" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+            <input aria-label="Observações gerais" type="text" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               className="w-full px-3 py-2 rounded-lg outline-none" style={{ background: "var(--input-background)", border: "1px solid var(--border)", fontSize: "0.875rem", color: "var(--foreground)" }} />
           </div>
         </div>
@@ -213,8 +213,8 @@ export function Reservations({ store }: ReservationsProps) {
           <div className="flex items-center justify-between mb-5">
             <h2 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>{months[month]} {year}</h2>
             <div className="flex gap-2">
-              <button onClick={() => setCalDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><ChevronLeft size={16} /></button>
-              <button onClick={() => setCalDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><ChevronRight size={16} /></button>
+              <button aria-label="Mês anterior" onClick={() => setCalDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><ChevronLeft size={16} /></button>
+              <button aria-label="Próximo mês" onClick={() => setCalDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><ChevronRight size={16} /></button>
             </div>
           </div>
           <div className="grid grid-cols-7 gap-1 mb-1">
@@ -247,7 +247,7 @@ export function Reservations({ store }: ReservationsProps) {
         <div className="fixed inset-y-0 right-0 w-80 shadow-2xl flex flex-col z-40" style={{ background: "var(--card)", borderLeft: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
             <h3 style={{ fontFamily: "'Playfair Display', serif", color: "var(--foreground)" }}>Reserva {selected.id}</h3>
-            <button onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={14} /></button>
+            <button aria-label="Fechar detalhes" onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--muted)" }}><X size={14} /></button>
           </div>
           <div className="flex-1 px-5 py-4 overflow-y-auto flex flex-col gap-4">
             <div>
