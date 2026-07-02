@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useStore } from "./app/store/useStore";
 import { AdminShell } from "./app/components/AdminShell";
-import triboLogo from "../imports/simbolo_do_tribo.jpeg";
+import triboLogo from "./imports/simbolo_do_tribo.jpeg";
 
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");

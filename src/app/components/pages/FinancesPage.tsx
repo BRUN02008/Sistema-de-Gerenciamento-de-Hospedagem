@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, ArrowUpRight, ArrowDownRight, Trash2, X, TrendingUp, TrendingDown } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
-import type { Store } from "../../store/useStore";
+import type { PaymentMethod, Store } from "../../store/useStore";
 import { EXPENSE_CATEGORIES, REVENUE_CATEGORIES } from "../../store/useStore";
 
 const PAYMENT_METHODS = ["Pix", "Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência Bancária"] as const;
@@ -84,7 +84,7 @@ export function FinancesPage({ store }: { store: Store }) {
                 </div>
                 <div>
                   <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Forma de Pagamento</label>
-                  <select value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value as any }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                  <select value={newTx.method} onChange={e => setNewTx(f => ({ ...f, method: e.target.value as PaymentMethod }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
                     {PAYMENT_METHODS.map(m => <option key={m}>{m}</option>)}
                   </select>
                 </div>
@@ -140,7 +140,7 @@ export function FinancesPage({ store }: { store: Store }) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.06)" vertical={false} />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(val: any, name: any) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Entrada" : "Saída"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 10, fontSize: 12 }} formatter={(val, name) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, name === "receita" ? "Entrada" : "Saída"]} />
               <Bar dataKey="receita" fill="#2d5016" radius={[3, 3, 0, 0]} />
               <Bar dataKey="despesa" fill="#c4882a" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -157,7 +157,7 @@ export function FinancesPage({ store }: { store: Store }) {
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={32} outerRadius={56} dataKey="value" paddingAngle={2}>
                     {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 12 }} formatter={(val: any, _: any, p: any) => [`R$ ${val.toLocaleString("pt-BR")}`, p.payload.name]} />
+                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 12 }} formatter={(val, _, p) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, p.payload.name]} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-1.5 mt-2">
@@ -221,5 +221,8 @@ export function FinancesPage({ store }: { store: Store }) {
     </div>
   );
 }
+
+
+
 
 

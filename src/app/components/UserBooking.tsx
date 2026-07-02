@@ -76,7 +76,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
     } else {
       if (dateStr <= checkin) { setCheckin(dateStr); setCheckout(null); return; }
       // Check no blocked dates in range
-      let cur = new Date(checkin);
+      const cur = new Date(checkin);
       cur.setDate(cur.getDate() + 1);
       let blocked = false;
       while (toDateStr(cur) < dateStr) {
@@ -292,7 +292,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                       <div
                         key={day}
                         className="aspect-square rounded-lg flex items-center justify-center select-none"
-                        style={{ background: s.bg, color: s.text, cursor: s.cursor, fontSize: "0.85rem", opacity: (s as any).opacity }}
+                        style={{ background: s.bg, color: s.text, cursor: s.cursor, fontSize: "0.85rem", opacity: s.opacity }}
                         onClick={() => handleDayClick(dateStr)}
                         onMouseEnter={() => setHoverDate(dateStr)}
                         onMouseLeave={() => setHoverDate(null)}
@@ -474,5 +474,6 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
     </div>
   );
 }
+
 
 

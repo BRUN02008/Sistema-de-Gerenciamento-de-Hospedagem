@@ -125,7 +125,7 @@ export function Reports({ store }: ReportsProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="tipo" tick={{ fontSize: 12, fill: "#7a7060" }} axisLine={false} tickLine={false} width={80} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: any) => [`R$ ${val.toLocaleString("pt-BR")}`, "Receita"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, "Receita"]} />
               <Bar dataKey="valor" fill="#2d5016" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -165,5 +165,7 @@ export function Reports({ store }: ReportsProps) {
     </div>
   );
 }
+
+
 
 

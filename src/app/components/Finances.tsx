@@ -160,7 +160,7 @@ export function Finances({ store }: FinancesProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" vertical={false} />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: any, name: any) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val, name) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
               <Bar dataKey="receita" fill="#2d5016" radius={[3, 3, 0, 0]} />
               <Bar dataKey="despesa" fill="#c4882a" radius={[3, 3, 0, 0]} />
             </BarChart>
@@ -178,7 +178,7 @@ export function Finances({ store }: FinancesProps) {
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={38} outerRadius={60} dataKey="value" paddingAngle={2}>
                     {pieData.map((_, idx) => <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: any, _: any, props: any) => [`R$ ${val.toLocaleString("pt-BR")}`, props.payload.name]} />
+                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val, _, props) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, props.payload.name]} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-1.5 mt-2">
@@ -241,5 +241,7 @@ export function Finances({ store }: FinancesProps) {
     </div>
   );
 }
+
+
 
 

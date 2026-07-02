@@ -145,7 +145,7 @@ export function ReportsPage({ store }: { store: Store }) {
                   <Pie data={revenuePie} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={2}>
                     {revenuePie.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 11 }} formatter={(val: any, _: any, p: any) => [`R$ ${val.toLocaleString("pt-BR")}`, p.payload.name]} />
+                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 11 }} formatter={(val, _, p) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, p.payload.name]} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-2">
@@ -234,5 +234,7 @@ export function ReportsPage({ store }: { store: Store }) {
     </div>
   );
 }
+
+
 
 

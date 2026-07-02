@@ -131,8 +131,17 @@ function ChartTooltipContent({
     payload?: unknown;
     label?: unknown;
     labelClassName?: string;
-    labelFormatter?: (...args: any[]) => React.ReactNode;
-    formatter?: (...args: any[]) => React.ReactNode;
+    labelFormatter?: (
+      value: React.ReactNode,
+      payload: ChartTooltipPayload[],
+    ) => React.ReactNode;
+    formatter?: (
+      value: unknown,
+      name: string | number,
+      item: ChartTooltipPayload,
+      index: number,
+      payload?: Record<string, unknown>,
+    ) => React.ReactNode;
     color?: string;
     hideLabel?: boolean;
     hideIndicator?: boolean;
@@ -159,7 +168,7 @@ function ChartTooltipContent({
     if (labelFormatter) {
       return (
         <div className={cn("font-medium", labelClassName)}>
-          {labelFormatter(value, tooltipPayload as any)}
+          {labelFormatter(value, tooltipPayload)}
         </div>
       );
     }
@@ -208,7 +217,7 @@ function ChartTooltipContent({
               )}
             >
               {formatter && item?.value !== undefined && item.name ? (
-                formatter(item.value as never, item.name as never, item as never, index, item.payload as never)
+                formatter(item.value, item.name, item, index, item.payload)
               ) : (
                 <>
                   {itemConfig?.icon ? (
@@ -247,7 +256,7 @@ function ChartTooltipContent({
                         {(itemConfig?.label as React.ReactNode) || String(item.name)}
                       </span>
                     </div>
-                    {item.value && (
+                    {item.value !== undefined && item.value !== null && (
                       <span className="text-foreground font-mono font-medium tabular-nums">
                         {String(item.value)}
                       </span>
@@ -331,7 +340,7 @@ function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,
   key: string,
-) {
+): ChartConfig[string] | undefined {
   if (typeof payload !== "object" || payload === null) {
     return undefined;
   }
@@ -373,3 +382,4 @@ export {
   ChartLegendContent,
   ChartStyle,
 };
+
