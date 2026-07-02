@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, ChevronLeft, ChevronRight, X, Search } from "lucide-react";
 import type { Store } from "../store/useStore";
-import { isRoomAvailable } from "../store/useStore";
+import { getBlockedDates, isRoomAvailable } from "../store/useStore";
 
 const statusColors: Record<string, { bg: string; text: string }> = {
   confirmado: { bg: "#2d501618", text: "#2d5016" },
@@ -110,7 +110,7 @@ function NewReservationModal({ store, onClose }: { store: Store; onClose: () => 
 }
 
 export function Reservations({ store }: ReservationsProps) {
-  const { reservations, cancelReservation, checkinReservation, checkoutReservation, updateReservation } = store;
+  const { reservations, rooms, cancelReservation, checkinReservation, checkoutReservation, updateReservation } = store;
 
   const [calDate, setCalDate] = useState(new Date(2026, 5, 1));
   const [selectedId, setSelectedId] = useState<string | null>(null);

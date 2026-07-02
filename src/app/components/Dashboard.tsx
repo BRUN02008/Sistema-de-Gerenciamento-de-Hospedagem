@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, BedDouble, Users, DollarSign } from "lucide-react";
+import { TrendingUp, TrendingDown, BedDouble, Users, DollarSign, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import type { Store } from "../store/useStore";
 
@@ -20,6 +20,13 @@ const occupancyData = [
   { dia: "Sáb", taxa: 100 },
   { dia: "Dom", taxa: 88 },
 ];
+
+const historyIcons: Record<string, typeof Clock> = {
+  reservation: Clock,
+  finance: DollarSign,
+  room: BedDouble,
+  system: AlertCircle,
+};
 
 const historyColors: Record<string, string> = {
   reservation: "#2d5016",
@@ -70,10 +77,6 @@ function formatTime(iso: string) {
   return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 }
 
-function currencyTooltipValue(value: unknown) {
-  return typeof value === "number" ? `R$ ${value.toLocaleString("pt-BR")}` : String(value ?? "");
-}
-
 interface DashboardProps {
   store: Store;
 }
@@ -84,6 +87,7 @@ export function Dashboard({ store }: DashboardProps) {
   const totalReceita = transactions.filter(t => t.type === "receita").reduce((s, t) => s + t.value, 0);
   const totalDespesa = transactions.filter(t => t.type === "despesa").reduce((s, t) => s + t.value, 0);
 
+  const today = "2026-06-04";
   const hospedados = reservations.filter(r => r.status === "hospedado").length;
   const pending = reservations.filter(r => r.status === "pendente").length;
 
@@ -124,7 +128,7 @@ export function Dashboard({ store }: DashboardProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" />
               <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val, name) => [currencyTooltipValue(val), name === "receita" ? "Receita" : "Despesa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: number, name: string) => [`R$ ${val.toLocaleString("pt-BR")}`, name === "receita" ? "Receita" : "Despesa"]} />
               <Area type="monotone" dataKey="receita" stroke="#2d5016" strokeWidth={2} fill="url(#recG)" />
               <Area type="monotone" dataKey="despesa" stroke="#c4882a" strokeWidth={2} fill="url(#despG)" />
             </AreaChart>
@@ -141,7 +145,7 @@ export function Dashboard({ store }: DashboardProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" vertical={false} />
               <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} domain={[0, 100]} tickFormatter={v => `${v}%`} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val) => [`${val ?? ""}%`, "Taxa"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: number) => [`${val}%`, "Taxa"]} />
               <Bar dataKey="taxa" fill="#2d5016" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

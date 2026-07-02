@@ -42,9 +42,10 @@ function formatTime(iso: string) {
 interface ReportsProps { store: Store; }
 
 export function Reports({ store }: ReportsProps) {
-  const { history, transactions } = store;
+  const { history, reservations, transactions } = store;
 
   const totalReceita = transactions.filter(t => t.type === "receita").reduce((s, t) => s + t.value, 0);
+  const totalDespesa = transactions.filter(t => t.type === "despesa").reduce((s, t) => s + t.value, 0);
 
   const revenueByType = [
     { tipo: "Hospedagem", valor: transactions.filter(t => t.category === "Hospedagem" && t.type === "receita").reduce((s,t) => s+t.value,0) },
@@ -125,7 +126,7 @@ export function Reports({ store }: ReportsProps) {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(44,35,18,0.07)" horizontal={false} />
               <XAxis type="number" tick={{ fontSize: 11, fill: "#7a7060" }} axisLine={false} tickLine={false} tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="tipo" tick={{ fontSize: 12, fill: "#7a7060" }} axisLine={false} tickLine={false} width={80} />
-              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val) => [typeof val === "number" ? `R$ ${val.toLocaleString("pt-BR")}` : String(val ?? ""), "Receita"]} />
+              <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.12)", borderRadius: 8, fontSize: 12 }} formatter={(val: number) => [`R$ ${val.toLocaleString("pt-BR")}`, "Receita"]} />
               <Bar dataKey="valor" fill="#2d5016" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>

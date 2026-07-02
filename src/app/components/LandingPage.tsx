@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Trees, Wifi, Coffee, Car, Star, MapPin, Phone, Mail,
-  Camera, MessageCircle, ChevronDown, ArrowRight, Shield,
+  Instagram, Facebook, ChevronDown, ArrowRight, Shield,
   Users, Leaf, Moon, Sunrise, Wind, Menu, X as XIcon
 } from "lucide-react";
 import type { Store } from "../store/useStore";
@@ -71,14 +71,8 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  function scrollToSection(id: string) {
-    const sectionRefs = {
-      inicio: heroRef,
-      acomodacoes: roomsRef,
-      beneficios: benefitsRef,
-      contato: contactRef,
-    };
-    sectionRefs[id as keyof typeof sectionRefs]?.current?.scrollIntoView({ behavior: "smooth" });
+  function scrollTo(ref: React.RefObject<HTMLDivElement | null>, id: string) {
+    ref.current?.scrollIntoView({ behavior: "smooth" });
     setActiveSection(id);
     setMobileMenu(false);
   }
@@ -91,10 +85,10 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
   const featuredRooms = FEATURED_ROOM_IDS.map(id => rooms.find(r => r.id === id)).filter(Boolean) as typeof rooms;
 
   const navLinks = [
-    { id: "inicio", label: "Início" },
-    { id: "acomodacoes", label: "Acomodações" },
-    { id: "beneficios", label: "Benefícios" },
-    { id: "contato", label: "Contato" },
+    { id: "inicio", label: "Início", ref: heroRef },
+    { id: "acomodacoes", label: "Acomodações", ref: roomsRef },
+    { id: "beneficios", label: "Benefícios", ref: benefitsRef },
+    { id: "contato", label: "Contato", ref: contactRef },
   ];
 
   return (
@@ -112,7 +106,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between" style={{ height: 68 }}>
           {/* Logo */}
-          <button onClick={() => scrollToSection("inicio")} className="flex items-center gap-2.5">
+          <button onClick={() => scrollTo(heroRef, "inicio")} className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#c4882a" }}>
               <Trees size={18} style={{ color: "#1a2e14" }} />
             </div>
@@ -124,10 +118,10 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map(({ id, label }) => (
+            {navLinks.map(({ id, label, ref }) => (
               <button
                 key={id}
-                onClick={() => scrollToSection(id)}
+                onClick={() => scrollTo(ref, id)}
                 className="transition-colors"
                 style={{
                   fontSize: "0.875rem",
@@ -173,8 +167,8 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
         {/* Mobile menu */}
         {mobileMenu && (
           <div className="md:hidden border-t px-6 py-4 flex flex-col gap-3" style={{ background: "rgba(26,46,20,0.98)", borderColor: "rgba(196,136,42,0.2)" }}>
-            {navLinks.map(({ id, label }) => (
-              <button key={id} onClick={() => scrollToSection(id)} className="text-left py-2" style={{ fontSize: "0.95rem", color: "#f7f4ef", background: "none", border: "none", cursor: "pointer" }}>
+            {navLinks.map(({ id, label, ref }) => (
+              <button key={id} onClick={() => scrollTo(ref, id)} className="text-left py-2" style={{ fontSize: "0.95rem", color: "#f7f4ef", background: "none", border: "none", cursor: "pointer" }}>
                 {label}
               </button>
             ))}
@@ -223,7 +217,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
                 Reservar Agora <ArrowRight size={18} />
               </button>
               <button
-                onClick={() => scrollToSection("acomodacoes")}
+                onClick={() => scrollTo(roomsRef, "acomodacoes")}
                 className="flex items-center gap-2 px-8 py-3.5 rounded-full"
                 style={{ background: "rgba(247,244,239,0.12)", border: "1.5px solid rgba(247,244,239,0.4)", color: "#f7f4ef", fontSize: "1rem" }}
               >
@@ -547,7 +541,7 @@ export function LandingPage({ store, onStartBooking, onAdminAccess }: LandingPag
             <div>
               <div style={{ fontSize: "0.72rem", color: "#c4882a", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 14 }}>Redes Sociais</div>
               <div className="flex gap-3 mb-5">
-                {[Camera, MessageCircle].map((Icon, i) => (
+                {[Instagram, Facebook].map((Icon, i) => (
                   <a key={i} href="#" className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: "rgba(255,255,255,0.07)", color: "rgba(247,244,239,0.6)" }}>
                     <Icon size={17} />
                   </a>

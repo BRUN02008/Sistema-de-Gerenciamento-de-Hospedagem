@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Wifi, Wind, Coffee, Users, Check, Trees, LogOut, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wifi, Wind, Coffee, Users, X, Check, Trees, LogOut, CalendarDays } from "lucide-react";
 import type { Store } from "../store/useStore";
 import { isRoomAvailable, getBlockedDates } from "../store/useStore";
 
@@ -31,14 +31,6 @@ function formatDate(s: string) {
   const [y, m, d] = s.split("-");
   return `${d}/${m}/${y}`;
 }
-
-type DayVisualStyle = {
-  bg: string;
-  text: string;
-  cursor: string;
-  border?: string;
-  opacity?: number;
-};
 
 type Step = "rooms" | "dates" | "form" | "confirm";
 
@@ -84,7 +76,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
     } else {
       if (dateStr <= checkin) { setCheckin(dateStr); setCheckout(null); return; }
       // Check no blocked dates in range
-      const cur = new Date(checkin);
+      let cur = new Date(checkin);
       cur.setDate(cur.getDate() + 1);
       let blocked = false;
       while (toDateStr(cur) < dateStr) {
@@ -107,7 +99,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
     return "available";
   }
 
-  function dayStyle(state: ReturnType<typeof getDayState>): DayVisualStyle {
+  function dayStyle(state: ReturnType<typeof getDayState>) {
     switch (state) {
       case "blocked": return { bg: "#b9323215", text: "#b93232", cursor: "not-allowed", border: "1px solid #b9323225" };
       case "past": return { bg: "transparent", text: "var(--muted-foreground)", cursor: "not-allowed", opacity: 0.4 };
@@ -214,6 +206,8 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
 
             <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
               {filteredRooms.map(room => {
+                const blocked = getBlockedDates(room.id, reservations);
+                const todayBlocked = blocked.includes(todayStr);
                 return (
                   <div key={room.id} className="rounded-2xl overflow-hidden cursor-pointer transition-all hover:shadow-lg"
                     style={{ background: "var(--card)", border: "1.5px solid var(--border)" }}
@@ -238,12 +232,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                           <Users size={12} /> {room.capacity} hóspedes
                         </div>
                         <div className="flex gap-1.5">
-                          {room.amenities.map(a => {
-                            const cfg = amenityIcons[a];
-                            if (!cfg) return null;
-                            const AmenityIcon = cfg.icon;
-                            return <AmenityIcon key={a} size={13} style={{ color: "var(--muted-foreground)" }} aria-label={cfg.label} />;
-                          })}
+                          {room.amenities.map(a => { const cfg = amenityIcons[a]; return cfg ? <cfg.icon key={a} size={13} style={{ color: "var(--muted-foreground)" }} title={cfg.label} /> : null; })}
                         </div>
                       </div>
                     </div>
@@ -305,7 +294,7 @@ export function UserBooking({ store, onLogout }: UserBookingProps) {
                       <div
                         key={day}
                         className="aspect-square rounded-lg flex items-center justify-center select-none"
-                        style={{ background: s.bg, color: s.text, cursor: s.cursor, fontSize: "0.85rem", opacity: s.opacity }}
+                        style={{ background: s.bg, color: s.text, cursor: s.cursor, fontSize: "0.85rem", opacity: (s as any).opacity }}
                         onClick={() => handleDayClick(dateStr)}
                         onMouseEnter={() => setHoverDate(dateStr)}
                         onMouseLeave={() => setHoverDate(null)}

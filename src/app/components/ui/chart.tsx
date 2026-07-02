@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
-import type { TooltipContentProps } from "recharts";
 
 import { cn } from "./utils";
 
@@ -105,20 +104,6 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-type ChartTooltipContentProps = React.ComponentProps<"div"> &
-  Pick<
-    TooltipContentProps,
-    "active" | "payload" | "label" | "labelFormatter" | "formatter"
-  > & {
-    hideLabel?: boolean;
-    hideIndicator?: boolean;
-    indicator?: "line" | "dot" | "dashed";
-    nameKey?: string;
-    labelKey?: string;
-    color?: string;
-    labelClassName?: string;
-  };
-
 function ChartTooltipContent({
   active,
   payload,
@@ -133,7 +118,14 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: ChartTooltipContentProps) {
+}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+  React.ComponentProps<"div"> & {
+    hideLabel?: boolean;
+    hideIndicator?: boolean;
+    indicator?: "line" | "dot" | "dashed";
+    nameKey?: string;
+    labelKey?: string;
+  }) {
   const { config } = useChart();
 
   const tooltipLabel = React.useMemo(() => {
@@ -194,7 +186,7 @@ function ChartTooltipContent({
 
           return (
             <div
-              key={String(item.dataKey ?? item.name ?? index)}
+              key={item.dataKey}
               className={cn(
                 "[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5",
                 indicator === "dot" && "items-center",
@@ -258,13 +250,6 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend;
 
-type ChartLegendPayloadItem = {
-  value?: React.ReactNode;
-  dataKey?: string | number;
-  color?: string;
-  payload?: unknown;
-};
-
 function ChartLegendContent({
   className,
   hideIcon = false,
@@ -272,9 +257,7 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey,
 }: React.ComponentProps<"div"> &
-  {
-    payload?: ChartLegendPayloadItem[];
-    verticalAlign?: "top" | "bottom" | "middle";
+  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
     hideIcon?: boolean;
     nameKey?: string;
   }) {
@@ -292,13 +275,13 @@ function ChartLegendContent({
         className,
       )}
     >
-      {payload.map((item, index) => {
+      {payload.map((item) => {
         const key = `${nameKey || item.dataKey || "value"}`;
         const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
         return (
           <div
-            key={String(item.value ?? item.dataKey ?? index)}
+            key={item.value}
             className={cn(
               "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
             )}
