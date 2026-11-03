@@ -64,7 +64,6 @@ export function AdminLoginModal({ onSuccess, onClose }: AdminLoginModalProps) {
               </div>
             </div>
             <button
-              aria-label="Fechar"
               onClick={onClose}
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: "rgba(255,255,255,0.08)", color: "rgba(247,244,239,0.5)" }}
@@ -138,7 +137,6 @@ export function AdminLoginModal({ onSuccess, onClose }: AdminLoginModalProps) {
           <div className="mt-4 text-center">
             <button
               onClick={onClose}
-              aria-label="Voltar ao site"
               style={{ fontSize: "0.8rem", color: "#7a7060", background: "none", border: "none", cursor: "pointer" }}
             >
               ← Voltar ao site

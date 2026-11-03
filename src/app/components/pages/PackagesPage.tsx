@@ -11,7 +11,7 @@ function PackageModal({ pkg, onSave, onClose }: {
     name: pkg?.name || "",
     description: pkg?.description || "",
     includes: pkg?.includes.join("\n") || "",
-    value: pkg?.value || 0,
+    value: pkg?.value ?? 500,
     active: pkg?.active ?? true,
   });
 
@@ -20,33 +20,33 @@ function PackageModal({ pkg, onSave, onClose }: {
       <div className="rounded-2xl w-full max-w-md p-6" style={{ background: "#fdfaf5" }}>
         <div className="flex items-center justify-between mb-5">
           <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>{pkg ? "Editar Pacote" : "Novo Pacote"}</h2>
-          <button aria-label="Fechar" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
         </div>
         <div className="flex flex-col gap-4">
           <div>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Nome do Pacote *</label>
-            <input aria-label="Nome do Pacote" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Descrição curta</label>
-            <input aria-label="Descrição" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>O que inclui (um item por linha)</label>
-            <textarea aria-label="O que inclui" value={form.includes} onChange={e => setForm(f => ({ ...f, includes: e.target.value }))} rows={4} className="w-full px-3 py-2.5 rounded-xl outline-none resize-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <textarea value={form.includes} onChange={e => setForm(f => ({ ...f, includes: e.target.value }))} rows={4} className="w-full px-3 py-2.5 rounded-xl outline-none resize-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Valor por casal (R$)</label>
-            <input aria-label="Valor por casal" type="number" value={form.value} onChange={e => setForm(f => ({ ...f, value: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input type="number" value={form.value} onChange={e => setForm(f => ({ ...f, value: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div className="flex items-center justify-between p-3 rounded-xl" style={{ background: "#f0ead8" }}>
             <span style={{ fontSize: "0.85rem", color: "#1c1a17", fontWeight: 500 }}>Pacote ativo</span>
-            <button aria-label="Alternar status do pacote" onClick={() => setForm(f => ({ ...f, active: !f.active }))} style={{ background: "none", border: "none", cursor: "pointer", lineHeight: 0 }}>
+            <button onClick={() => setForm(f => ({ ...f, active: !f.active }))} style={{ background: "none", border: "none", cursor: "pointer", lineHeight: 0 }}>
               {form.active ? <ToggleRight size={28} style={{ color: "#2d5016" }} /> : <ToggleLeft size={28} style={{ color: "#7a7060" }} />}
             </button>
           </div>
           <div className="flex gap-3">
-            <button aria-label="Cancelar" onClick={onClose} className="flex-1 py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem" }}>Cancelar</button>
+            <button onClick={onClose} className="flex-1 py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem" }}>Cancelar</button>
             <button
               onClick={() => {
                 onSave({
@@ -116,17 +116,16 @@ export function PackagesPage({ store }: { store: Store }) {
         {/* Actions */}
         <div className="px-5 pb-4 flex gap-2">
           <button
-            aria-label={p.active ? "Desativar pacote" : "Ativar pacote"}
             onClick={() => updatePackage(p.id, { active: !p.active })}
             className="flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5"
             style={{ background: p.active ? "#b9323212" : "#2d501612", color: p.active ? "#b93232" : "#2d5016", fontSize: "0.8rem" }}
           >
             {p.active ? <><ToggleLeft size={14} /> Desativar</> : <><ToggleRight size={14} /> Ativar</>}
           </button>
-          <button aria-label="Editar pacote" onClick={() => setModal(p)} className="py-2 px-4 rounded-xl" style={{ background: "#2d501612", color: "#2d5016" }}>
+          <button onClick={() => setModal(p)} className="py-2 px-4 rounded-xl" style={{ background: "#2d501612", color: "#2d5016" }}>
             <Edit2 size={14} />
           </button>
-          <button aria-label="Excluir pacote" onClick={() => deletePackage(p.id, p.name)} className="py-2 px-4 rounded-xl" style={{ background: "#b9323212", color: "#b93232" }}>
+          <button onClick={() => deletePackage(p.id, p.name)} className="py-2 px-4 rounded-xl" style={{ background: "#b9323212", color: "#b93232" }}>
             <Trash2 size={14} />
           </button>
         </div>
@@ -160,7 +159,7 @@ export function PackagesPage({ store }: { store: Store }) {
         <div>
           <div style={{ fontSize: "0.875rem", color: "#2d5016", fontWeight: 500 }}>Como funcionam os pacotes</div>
           <div style={{ fontSize: "0.8rem", color: "#2d501680", lineHeight: 1.55, marginTop: 2 }}>
-            Os pacotes definem o valor base de cada reserva. Ao criar uma reserva, o hóspede deve escolher obrigatoriamente um pacote. Serviços opcionais são somados ao valor do pacote, com possibilidade de desconto sobre o total.
+            Os pacotes começam em R$ 500, mas o valor fica aberto para edição. Ao criar uma reserva, o pacote é obrigatório e os serviços opcionais são somados automaticamente ao valor total.
           </div>
         </div>
       </div>

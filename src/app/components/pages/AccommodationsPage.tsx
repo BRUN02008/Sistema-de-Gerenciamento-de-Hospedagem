@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Plus, Edit2, Trash2, X, Users, Wifi, Wind, Coffee, Waves, Star, Check, BedDouble } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Users, Wifi, Wind, Coffee, Waves, Star, Check, BedDouble, Search } from "lucide-react";
 import type { Store, Accommodation, AccommodationStatus } from "../../store/useStore";
+import { isAccommodationAvailable } from "../../store/useStore";
+import { getSuiteImage } from "../../utils/suiteImages";
 
 const STATUS_CFG: Record<AccommodationStatus, { label: string; bg: string; text: string }> = {
   "disponível": { label: "Livre", bg: "#2d501615", text: "#2d5016" },
@@ -35,8 +37,8 @@ function AccommodationModal({ mode, accommodation, onSave, onClose }: {
       <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(10,18,7,0.6)", backdropFilter: "blur(6px)" }}>
         <div className="rounded-2xl w-full max-w-lg overflow-hidden" style={{ background: "#fdfaf5" }}>
           <div className="h-48 overflow-hidden relative">
-            <img src={accommodation.image} alt={accommodation.name} className="w-full h-full object-cover" />
-            <button aria-label="Fechar" onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <img src={getSuiteImage(accommodation.id, accommodation.image)} alt={accommodation.name} className="w-full h-full object-cover" />
+            <button onClick={onClose} className="absolute top-3 right-3 w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
               <X size={14} style={{ color: "#fff" }} />
             </button>
             <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full" style={{ fontSize: "0.7rem", background: sc.bg, color: sc.text, fontWeight: 700, backdropFilter: "blur(4px)" }}>
@@ -69,7 +71,7 @@ function AccommodationModal({ mode, accommodation, onSave, onClose }: {
                 );
               })}
             </div>
-            <button aria-label="Fechar" onClick={onClose} className="w-full mt-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>
+            <button onClick={onClose} className="w-full mt-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>
               Fechar
             </button>
           </div>
@@ -89,40 +91,40 @@ function AccommodationModal({ mode, accommodation, onSave, onClose }: {
           <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>
             {mode === "add" ? "Nova Acomodação" : "Editar Acomodação"}
           </h2>
-          <button aria-label="Fechar" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Nome *</label>
-            <input aria-label="Nome da acomodação" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }} />
+            <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }} />
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Tipo</label>
-            <select aria-label="Tipo da acomodação" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as Accommodation["type"] }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
-              <option>Cabana</option><option>Chalé</option><option>Suíte</option>
+            <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as Accommodation["type"] }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
+              <option>Cabana</option><option>Chalé</option><option>Suíte</option><option>Flutuante</option>
             </select>
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Status</label>
-            <select aria-label="Status da acomodação" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as AccommodationStatus }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
+            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as AccommodationStatus }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem", color: "#1c1a17" }}>
               <option value="disponível">Livre</option><option value="ocupado">Ocupado</option><option value="reservado">Reservado</option><option value="manutenção">Manutenção</option>
             </select>
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Capacidade</label>
-            <input aria-label="Capacidade da acomodação" type="number" value={form.capacity} onChange={e => setForm(f => ({ ...f, capacity: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input type="number" value={form.capacity} onChange={e => setForm(f => ({ ...f, capacity: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Diária (R$)</label>
-            <input aria-label="Preço da diária" type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: +e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>URL da Foto</label>
-            <input aria-label="URL da foto" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-1.5" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Descrição</label>
-            <textarea aria-label="Descrição da acomodação" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-3 py-2.5 rounded-xl outline-none resize-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full px-3 py-2.5 rounded-xl outline-none resize-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </div>
           <div style={{ gridColumn: "1/-1" }}>
             <label className="block mb-2" style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500 }}>Comodidades</label>
@@ -151,11 +153,21 @@ function AccommodationModal({ mode, accommodation, onSave, onClose }: {
 }
 
 export function AccommodationsPage({ store }: { store: Store }) {
-  const { accommodations, addAccommodation, updateAccommodation, deleteAccommodation } = store;
+  const { accommodations, reservations, addAccommodation, updateAccommodation, deleteAccommodation } = store;
   const [modal, setModal] = useState<{ mode: ModalMode; acc?: Accommodation } | null>(null);
   const [filterStatus, setFilterStatus] = useState<AccommodationStatus | "todos">("todos");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
-  const filtered = accommodations.filter(a => filterStatus === "todos" || a.status === filterStatus);
+  const dateFilterActive = Boolean(dateFrom && dateTo && dateTo > dateFrom);
+
+  const filtered = accommodations.filter(a => {
+    if (filterStatus !== "todos" && a.status !== filterStatus) return false;
+    if (dateFilterActive) {
+      return isAccommodationAvailable(a.id, dateFrom, dateTo, reservations);
+    }
+    return true;
+  });
 
   const counts = {
     disponível: accommodations.filter(a => a.status === "disponível").length,
@@ -180,13 +192,43 @@ export function AccommodationsPage({ store }: { store: Store }) {
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.5rem", color: "#1a2e14", fontWeight: 600 }}>Acomodações</h1>
           <p style={{ fontSize: "0.82rem", color: "#7a7060" }}>{accommodations.length} acomodações cadastradas</p>
         </div>
-        <button onClick={() => setModal({ mode: "add" })} className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem", fontWeight: 500 }}>
-          <Plus size={16} /> Adicionar Acomodação
+        <button onClick={() => setModal({ mode: "add" })} className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem", fontWeight: 500 }}>
+          <Plus size={16} /> <span className="hidden sm:inline">Adicionar Acomodação</span><span className="sm:hidden">Adicionar</span>
         </button>
       </div>
 
+      {/* Date availability search */}
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3 px-4 sm:px-5 py-4 rounded-2xl" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
+        <div className="flex items-center gap-2 sm:hidden" style={{ fontSize: "0.72rem", color: "#7a7060", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+          <Search size={13} /> Busca por disponibilidade
+        </div>
+        <Search size={16} style={{ color: "#7a7060", marginBottom: 10, flexShrink: 0 }} className="hidden sm:block" />
+        <div className="flex-1">
+          <label style={{ fontSize: "0.72rem", color: "#7a7060", fontWeight: 600, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>Check-in</label>
+          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-full px-3 py-2 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+        </div>
+        <div className="flex-1">
+          <label style={{ fontSize: "0.72rem", color: "#7a7060", fontWeight: 600, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.06em" }}>Check-out</label>
+          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-full px-3 py-2 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+        </div>
+        <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1">
+          {dateFilterActive ? (
+            <>
+              <span className="px-2.5 py-1 rounded-full" style={{ fontSize: "0.7rem", background: "#2d501618", color: "#2d5016", fontWeight: 600 }}>
+                {filtered.length} disponíve{filtered.length !== 1 ? "is" : "l"}
+              </span>
+              <button onClick={() => { setDateFrom(""); setDateTo(""); }} style={{ fontSize: "0.72rem", color: "#b93232", background: "none", border: "none", cursor: "pointer" }}>
+                Limpar datas
+              </button>
+            </>
+          ) : (
+            <span className="hidden sm:block" style={{ fontSize: "0.75rem", color: "#7a7060" }}>Selecione datas para filtrar</span>
+          )}
+        </div>
+      </div>
+
       {/* Status counts */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {(Object.entries(STATUS_CFG) as [AccommodationStatus, typeof STATUS_CFG[AccommodationStatus]][]).map(([status, cfg]) => (
           <button key={status} onClick={() => setFilterStatus(filterStatus === status ? "todos" : status)} className="rounded-xl p-4 flex items-center gap-3 transition-all" style={{ background: filterStatus === status ? cfg.bg : "#fdfaf5", border: `1.5px solid ${filterStatus === status ? cfg.text + "40" : "rgba(44,35,18,0.08)"}` }}>
             <div className="w-3 h-8 rounded-full" style={{ background: cfg.text }} />
@@ -198,15 +240,24 @@ export function AccommodationsPage({ store }: { store: Store }) {
         ))}
       </div>
 
+      {dateFilterActive && (
+        <div className="px-4 py-2.5 rounded-xl flex items-center gap-2" style={{ background: "#2d501610", border: "1px solid #2d501625" }}>
+          <Search size={13} style={{ color: "#2d5016" }} />
+          <span style={{ fontSize: "0.82rem", color: "#2d5016" }}>
+            Exibindo acomodações disponíveis de <strong>{dateFrom.split("-").reverse().join("/")}</strong> a <strong>{dateTo.split("-").reverse().join("/")}</strong>
+          </span>
+        </div>
+      )}
+
       {/* Accommodation cards */}
-      <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5">
         {filtered.map(acc => {
           const sc = STATUS_CFG[acc.status];
           return (
             <div key={acc.id} className="rounded-2xl overflow-hidden" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.09)" }}>
               <div className="relative h-44 overflow-hidden">
-                {acc.image ? (
-                  <img src={acc.image} alt={acc.name} className="w-full h-full object-cover" />
+                {getSuiteImage(acc.id, acc.image) ? (
+                  <img src={getSuiteImage(acc.id, acc.image)} alt={acc.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center" style={{ background: "#ede8df" }}>
                     <BedDouble size={40} style={{ color: "#7a7060" }} />
@@ -239,17 +290,17 @@ export function AccommodationsPage({ store }: { store: Store }) {
                 <div className="flex items-center gap-1.5 mb-3">
                   {acc.amenities.slice(0, 4).map(a => {
                     const cfg = AMENITY_ICONS[a];
-                    return cfg ? <cfg.icon key={a} size={13} style={{ color: "#7a7060" }} aria-label={cfg.label} /> : null;
+                    return cfg ? <span key={a} title={cfg.label}><cfg.icon size={13} style={{ color: "#7a7060" }} /></span> : null;
                   })}
                 </div>
                 <div className="flex gap-2">
-                  <button aria-label="Ver detalhes" onClick={() => setModal({ mode: "view", acc })} className="flex-1 py-1.5 rounded-lg" style={{ background: "#1a2e1410", color: "#1a2e14", fontSize: "0.78rem", fontWeight: 500 }}>
+                  <button onClick={() => setModal({ mode: "view", acc })} className="flex-1 py-1.5 rounded-lg" style={{ background: "#1a2e1410", color: "#1a2e14", fontSize: "0.78rem", fontWeight: 500 }}>
                     Detalhes
                   </button>
-                  <button aria-label="Editar acomodação" onClick={() => setModal({ mode: "edit", acc })} className="py-1.5 px-3 rounded-lg" style={{ background: "#2d501615", color: "#2d5016", fontSize: "0.78rem" }}>
+                  <button onClick={() => setModal({ mode: "edit", acc })} className="py-1.5 px-3 rounded-lg" style={{ background: "#2d501615", color: "#2d5016", fontSize: "0.78rem" }}>
                     <Edit2 size={13} />
                   </button>
-                  <button aria-label="Excluir acomodação" onClick={() => deleteAccommodation(acc.id, acc.name)} className="py-1.5 px-3 rounded-lg" style={{ background: "#b9323215", color: "#b93232", fontSize: "0.78rem" }}>
+                  <button onClick={() => deleteAccommodation(acc.id, acc.name)} className="py-1.5 px-3 rounded-lg" style={{ background: "#b9323215", color: "#b93232", fontSize: "0.78rem" }}>
                     <Trash2 size={13} />
                   </button>
                 </div>
@@ -257,6 +308,14 @@ export function AccommodationsPage({ store }: { store: Store }) {
             </div>
           );
         })}
+        {filtered.length === 0 && (
+          <div className="col-span-full py-12 text-center rounded-2xl" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
+            <BedDouble size={32} style={{ color: "#b8b0a0", margin: "0 auto 8px" }} />
+            <div style={{ fontSize: "0.875rem", color: "#7a7060" }}>
+              {dateFilterActive ? "Nenhuma acomodação disponível nas datas selecionadas" : "Nenhuma acomodação encontrada"}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -145,7 +145,7 @@ export function ReportsPage({ store }: { store: Store }) {
                   <Pie data={revenuePie} cx="50%" cy="50%" innerRadius={40} outerRadius={65} dataKey="value" paddingAngle={2}>
                     {revenuePie.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 11 }} formatter={(val, _, p) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, p.payload.name]} />
+                  <Tooltip contentStyle={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.1)", borderRadius: 8, fontSize: 11 }} formatter={(val, _name, item) => [`R$ ${Number(val ?? 0).toLocaleString("pt-BR")}`, String(item.payload?.name ?? "")]} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-col gap-2">
@@ -196,7 +196,7 @@ export function ReportsPage({ store }: { store: Store }) {
           <ExportCard icon={BedDouble} title="Relatório de Reservas" desc="Histórico completo de hospedagens" />
           <ExportCard icon={ConciergeBell} title="Relatório de Serviços" desc="Serviços prestados e receita" />
           <ExportCard icon={BedDouble} title="Relatório de Ocupação" desc="Taxa de ocupação por acomodação" />
-          <ExportCard icon={Tag} title="Relatório de Promoções" desc="Promoções aplicadas e descontos" />
+          <ExportCard icon={Tag} title="Relatório de Pacotes" desc="Pacotes vendidos e serviços opcionais" />
           <ExportCard icon={FileText} title="Relatório Completo" desc="Visão geral do sistema completo" />
         </div>
       </div>
@@ -234,7 +234,3 @@ export function ReportsPage({ store }: { store: Store }) {
     </div>
   );
 }
-
-
-
-

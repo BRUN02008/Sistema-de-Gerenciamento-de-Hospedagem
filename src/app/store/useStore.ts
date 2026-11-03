@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type ReservationStatus = "confirmado" | "pendente" | "cancelado" | "hospedado";
+export type ReservationStatus = "confirmado" | "pendente" | "cancelado" | "hospedado" | "concluído";
 export type AccommodationStatus = "disponível" | "ocupado" | "reservado" | "manutenção";
 export type EmployeeStatus = "ativo" | "inativo" | "férias";
 export type PromotionType = "percentual" | "valor_fixo";
@@ -46,10 +46,10 @@ export interface Reservation {
   email: string;
   accommodationId: string;
   accommodationName: string;
-  roomId?: string;
-  roomName?: string;
   checkin: string;
   checkout: string;
+  checkinTime?: string;
+  checkoutTime?: string;
   value: number;
   originalValue: number;
   packageId: string;
@@ -61,6 +61,8 @@ export interface Reservation {
   guests: number;
   status: ReservationStatus;
   paymentMethod: PaymentMethod;
+  paymentMethod2?: string;
+  paidPercent?: number;
   createdAt: string;
   notes: string;
 }
@@ -124,11 +126,11 @@ export interface HistoryEntry {
 export const EXPENSE_CATEGORIES = [
   "Funcionários", "Compras café da manhã", "Compras jantar",
   "Conta de energia", "Internet", "Manutenção", "Empréstimo",
-  "Pagamento flutuante", "Outros",
+  "Pagamento flutuante", "Extras", "Outros",
 ];
 
 export const REVENUE_CATEGORIES = [
-  "Diárias da hospedagem", "Venda de artesanatos", "Aluguel flutuante",
+  "Diárias da hospedagem", "Venda de artesanatos", "Aluguel flutuante", "Extras",
 ];
 
 // ─── Default seed data ────────────────────────────────────────────────────────
@@ -148,7 +150,7 @@ const DEFAULT_PACKAGES: Package[] = [
     name: "Pacote 2",
     description: "Hospedagem + Café da Manhã + Jantar",
     includes: ["Hospedagem na acomodação escolhida", "Café da manhã completo incluso", "Jantar especial regional incluso"],
-    value: 600,
+    value: 500,
     active: true,
     createdAt: "2026-01-01T00:00:00Z",
   },
@@ -163,7 +165,7 @@ const DEFAULT_ACCOMMODATIONS: Accommodation[] = [
     status: "disponível",
   },
   {
-    id: "KAN01", name: "Cabana Kanarô", type: "Cabana", capacity: 4, price: 580,
+    id: "KAN01", name: "Cabana Kanarô", type: "Cabana", capacity: 4, price: 1300,
     amenities: ["wifi", "café", "varanda", "ar-cond"],
     image: "https://images.unsplash.com/photo-1537622417195-e1ef8ce041e7?w=700&h=480&fit=crop&auto=format",
     description: "Cabana rústica e aconchegante às margens do rio, com varanda privativa e vista para a floresta amazônica.",
@@ -213,6 +215,8 @@ const DEFAULT_SERVICES: Service[] = [
   { id: "SRV-002", name: "Decoração Romântica", value: 150, available: true, description: "Decoração especial do quarto com pétalas de flores, velas e arranjos florais regionais.", category: "Decoração", hasQuantity: false, quantityLabel: "serviço" },
   { id: "SRV-003", name: "Massagem Terapêutica", value: 120, available: true, description: "Sessão de massagem relaxante com óleos essenciais amazônicos. Cobrado por pessoa.", category: "Bem-estar", hasQuantity: true, quantityLabel: "pessoa" },
   { id: "SRV-004", name: "Escalda Pés", value: 30, available: true, description: "Escalda pés com ervas medicinais e aromaterapia da flora amazônica.", category: "Bem-estar", hasQuantity: false, quantityLabel: "serviço" },
+  { id: "SRV-005", name: "Café da Manhã", value: 45, available: true, description: "Café da manhã completo com produtos regionais amazônicos, frutas frescas e pães artesanais.", category: "Alimentação", hasQuantity: true, quantityLabel: "pessoa" },
+  { id: "SRV-006", name: "Jantar", value: 80, available: true, description: "Jantar especial com culinária regional amazônica, incluindo pratos típicos e sobremesas da floresta.", category: "Alimentação", hasQuantity: true, quantityLabel: "pessoa" },
 ];
 
 const DEFAULT_PROMOTIONS: Promotion[] = [
@@ -222,14 +226,15 @@ const DEFAULT_PROMOTIONS: Promotion[] = [
 const EMPTY_RES_FIELDS = {
   packageId: "PKG-001", packageName: "Pacote 1", packageValue: 500,
   optionals: [] as ReservationOptional[], discountPercent: 0, discountAmount: 0, originalValue: 500,
+  paidPercent: 0,
 };
 
 const DEFAULT_RESERVATIONS: Reservation[] = [
-  { id: "R-2401", guest: "Carolina Ferreira", phone: "(11) 99421-3302", email: "carolina@email.com", accommodationId: "CAI01", accommodationName: "Chalé Caiapó", checkin: "2026-06-04", checkout: "2026-06-07", value: 1500, ...EMPTY_RES_FIELDS, guests: 2, status: "hospedado", paymentMethod: "Cartão de Crédito", createdAt: "2026-05-20T10:30:00Z", notes: "" },
-  { id: "R-2402", guest: "Marcos Oliveira", phone: "(21) 98734-5521", email: "marcos@email.com", accommodationId: "TIC01", accommodationName: "Suite Ticuna", checkin: "2026-06-05", checkout: "2026-06-08", value: 1620, packageId: "PKG-002", packageName: "Pacote 2", packageValue: 600, optionals: [{ id: "decoracao", name: "Decoração Romântica", unitValue: 150, quantity: 1, total: 150, notes: "" }], discountPercent: 10, discountAmount: 180, originalValue: 1800, guests: 2, status: "confirmado", paymentMethod: "Pix", createdAt: "2026-05-22T14:00:00Z", notes: "" },
+  { id: "R-2401", guest: "Carolina Ferreira", phone: "(11) 99421-3302", email: "carolina@email.com", accommodationId: "CAI01", accommodationName: "Chalé Caiapó", checkin: "2026-06-04", checkout: "2026-06-07", checkinTime: "14:00", checkoutTime: "12:00", value: 1500, ...EMPTY_RES_FIELDS, guests: 2, status: "hospedado", paymentMethod: "Cartão de Crédito", createdAt: "2026-05-20T10:30:00Z", notes: "" },
+  { id: "R-2402", guest: "Marcos Oliveira", phone: "(21) 98734-5521", email: "marcos@email.com", accommodationId: "TIC01", accommodationName: "Suite Ticuna", checkin: "2026-06-05", checkout: "2026-06-08", checkinTime: "15:00", checkoutTime: "11:00", value: 650, packageId: "PKG-002", packageName: "Pacote 2", packageValue: 500, optionals: [{ id: "SRV-002", name: "Decoração Romântica", unitValue: 150, quantity: 1, total: 150, notes: "" }], discountPercent: 0, discountAmount: 0, originalValue: 650, paidPercent: 50, guests: 2, status: "confirmado", paymentMethod: "Pix", createdAt: "2026-05-22T14:00:00Z", notes: "" },
   { id: "R-2403", guest: "Ana Beatriz Lima", phone: "(31) 97654-2211", email: "ana@email.com", accommodationId: "KAM01", accommodationName: "Chalé Kamaiurá", checkin: "2026-06-06", checkout: "2026-06-09", value: 500, ...EMPTY_RES_FIELDS, guests: 1, status: "confirmado", paymentMethod: "Transferência Bancária", createdAt: "2026-05-28T09:15:00Z", notes: "" },
-  { id: "R-2404", guest: "Roberto Santos", phone: "(11) 96543-8870", email: "roberto@email.com", accommodationId: "KAN01", accommodationName: "Cabana Kanarô", checkin: "2026-06-07", checkout: "2026-06-10", value: 540, packageId: "PKG-001", packageName: "Pacote 1", packageValue: 500, optionals: [{ id: "passeios", name: "Passeios", unitValue: 40, quantity: 1, total: 40, notes: "" }], discountPercent: 0, discountAmount: 0, originalValue: 540, guests: 3, status: "confirmado", paymentMethod: "Dinheiro", createdAt: "2026-05-30T16:45:00Z", notes: "" },
-  { id: "R-2405", guest: "Juliana Costa", phone: "(41) 95432-1198", email: "juliana@email.com", accommodationId: "GUA01", accommodationName: "Suite Guarani", checkin: "2026-06-08", checkout: "2026-06-12", value: 600, ...{ packageId: "PKG-002", packageName: "Pacote 2", packageValue: 600, optionals: [] as ReservationOptional[], discountPercent: 0, discountAmount: 0, originalValue: 600 }, guests: 2, status: "pendente", paymentMethod: "Cartão de Débito", createdAt: "2026-06-01T11:00:00Z", notes: "" },
+  { id: "R-2404", guest: "Roberto Santos", phone: "(11) 96543-8870", email: "roberto@email.com", accommodationId: "KAN01", accommodationName: "Cabana Kanarô", checkin: "2026-06-07", checkout: "2026-06-10", value: 540, packageId: "PKG-001", packageName: "Pacote 1", packageValue: 500, optionals: [{ id: "SRV-001", name: "Passeios", unitValue: 40, quantity: 1, total: 40, notes: "" }], discountPercent: 0, discountAmount: 0, originalValue: 540, paidPercent: 100, guests: 3, status: "confirmado", paymentMethod: "Dinheiro", createdAt: "2026-05-30T16:45:00Z", notes: "" },
+  { id: "R-2405", guest: "Juliana Costa", phone: "(41) 95432-1198", email: "juliana@email.com", accommodationId: "GUA01", accommodationName: "Suite Guarani", checkin: "2026-06-08", checkout: "2026-06-12", value: 500, ...{ packageId: "PKG-002", packageName: "Pacote 2", packageValue: 500, optionals: [] as ReservationOptional[], discountPercent: 0, discountAmount: 0, originalValue: 500, paidPercent: 0 }, guests: 2, status: "pendente", paymentMethod: "Cartão de Débito", createdAt: "2026-06-01T11:00:00Z", notes: "" },
   { id: "R-2406", guest: "Fernando Alves", phone: "(51) 94321-0077", email: "fernando@email.com", accommodationId: "KAM01", accommodationName: "Chalé Kamaiurá", checkin: "2026-06-10", checkout: "2026-06-13", value: 500, ...EMPTY_RES_FIELDS, guests: 2, status: "confirmado", paymentMethod: "Pix", createdAt: "2026-06-02T08:30:00Z", notes: "" },
 ];
 
@@ -277,42 +282,25 @@ export function isAccommodationAvailable(
   return !reservations.some(r => {
     if (r.accommodationId !== accommodationId) return false;
     if (r.id === excludeId) return false;
-    if (r.status === "cancelado") return false;
+    if (r.status === "cancelado" || r.status === "concluído") return false;
     const rci = new Date(r.checkin).getTime();
     const rco = new Date(r.checkout).getTime();
     return ci < rco && co > rci;
   });
 }
 
-export const isRoomAvailable = isAccommodationAvailable;
-
-type NewReservationData = {
-  guest: string;
-  phone: string;
-  email: string;
-  accommodationId?: string;
-  accommodationName?: string;
-  roomId?: string;
-  roomName?: string;
-  checkin: string;
-  checkout: string;
-  value: number;
-  originalValue?: number;
-  packageId?: string;
-  packageName?: string;
-  packageValue?: number;
-  optionals?: ReservationOptional[];
-  discountPercent?: number;
-  discountAmount?: number;
-  guests: number;
-  paymentMethod?: PaymentMethod;
-  notes: string;
-};
-
 function syncAccStatus(accId: string, allReservations: Reservation[]): AccommodationStatus {
-  const today = new Date().toISOString().slice(0, 10);
-  const active = allReservations.filter(r => r.accommodationId === accId && r.status !== "cancelado");
-  const isOccupied = active.some(r => r.status === "hospedado" && today >= r.checkin && today < r.checkout);
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const currentTime = now.toTimeString().slice(0, 5);
+  const active = allReservations.filter(r => r.accommodationId === accId && r.status !== "cancelado" && r.status !== "concluído");
+  const isOccupied = active.some(r => {
+    if (r.status !== "hospedado") return false;
+    if (today > r.checkin && today < r.checkout) return true;
+    if (today === r.checkin) return currentTime >= (r.checkinTime || "00:00");
+    if (today === r.checkout) return currentTime < (r.checkoutTime || "23:59");
+    return false;
+  });
   if (isOccupied) return "ocupado";
   if (active.length > 0) return "reservado";
   return "disponível";
@@ -321,7 +309,7 @@ function syncAccStatus(accId: string, allReservations: Reservation[]): Accommoda
 export function getBlockedDates(accommodationId: string, reservations: Reservation[]): string[] {
   const blocked: string[] = [];
   reservations.forEach(r => {
-    if (r.accommodationId !== accommodationId || r.status === "cancelado") return;
+    if (r.accommodationId !== accommodationId || r.status === "cancelado" || r.status === "concluído") return;
     const ci = new Date(r.checkin);
     const co = new Date(r.checkout);
     const cur = new Date(ci);
@@ -343,10 +331,10 @@ function loadOrSeed<T>(key: string, defaults: T): T {
 
 export function useStore() {
   const [accommodations, setAccommodationsRaw] = useState<Accommodation[]>(() => loadOrSeed("tribo_v4_accommodations", DEFAULT_ACCOMMODATIONS));
-  const [reservations, setReservationsRaw] = useState<Reservation[]>(() => loadOrSeed("tribo_v4_reservations", DEFAULT_RESERVATIONS));
+  const [reservations, setReservationsRaw] = useState<Reservation[]>(() => loadOrSeed("tribo_v5_reservations", DEFAULT_RESERVATIONS));
   const [transactions, setTransactionsRaw] = useState<Transaction[]>(() => loadOrSeed("tribo_v2_transactions", DEFAULT_TRANSACTIONS));
   const [employees, setEmployeesRaw] = useState<Employee[]>(() => loadOrSeed("tribo_v2_employees", DEFAULT_EMPLOYEES));
-  const [services, setServicesRaw] = useState<Service[]>(() => loadOrSeed("tribo_v3_services", DEFAULT_SERVICES));
+  const [services, setServicesRaw] = useState<Service[]>(() => loadOrSeed("tribo_v4_services", DEFAULT_SERVICES));
   const [promotions, setPromotionsRaw] = useState<Promotion[]>(() => loadOrSeed("tribo_v2_promotions", DEFAULT_PROMOTIONS));
   const [packages, setPackagesRaw] = useState<Package[]>(() => loadOrSeed("tribo_v2_packages", DEFAULT_PACKAGES));
   const [history, setHistoryRaw] = useState<HistoryEntry[]>(() => loadOrSeed("tribo_v2_history", DEFAULT_HISTORY));
@@ -357,57 +345,44 @@ export function useStore() {
   }, []);
 
   // ─── Reservations ───────────────────────────────────────────────────────────
-  const addReservation = useCallback((data: NewReservationData) => {
-    const accommodationId = data.accommodationId ?? data.roomId ?? "";
-    const accommodationName = data.accommodationName ?? data.roomName ?? "";
-    const r: Reservation = {
-      guest: data.guest,
-      phone: data.phone,
-      email: data.email,
-      accommodationId,
-      accommodationName,
-      roomId: accommodationId,
-      roomName: accommodationName,
-      checkin: data.checkin,
-      checkout: data.checkout,
-      value: data.value,
-      originalValue: data.originalValue ?? data.value,
-      packageId: data.packageId ?? "PKG-001",
-      packageName: data.packageName ?? "Pacote 1",
-      packageValue: data.packageValue ?? 500,
-      optionals: data.optionals ?? [],
-      discountPercent: data.discountPercent ?? 0,
-      discountAmount: data.discountAmount ?? 0,
-      guests: data.guests,
-      paymentMethod: data.paymentMethod ?? "Pix",
-      notes: data.notes,
-      id: generateId("R"),
-      status: "pendente",
-      createdAt: new Date().toISOString(),
-    };
-    setReservationsRaw(prev => { const u = [r, ...prev]; save("tribo_v4_reservations", u); return u; });
+  const addReservation = useCallback((data: Omit<Reservation, "id" | "createdAt" | "status">) => {
+    const r: Reservation = { ...data, id: generateId("R"), status: "pendente", createdAt: new Date().toISOString() };
+    setReservationsRaw(prev => { const u = [r, ...prev]; save("tribo_v5_reservations", u); return u; });
     setAccommodationsRaw(prev => {
-      const updated = prev.map(a => a.id !== accommodationId || a.status === "manutenção" ? a : { ...a, status: "reservado" as AccommodationStatus });
+      const updated = prev.map(a => a.id !== data.accommodationId || a.status === "manutenção" ? a : { ...a, status: "reservado" as AccommodationStatus });
       save("tribo_v4_accommodations", updated);
       return updated;
     });
-    addHistory({ action: "Reserva criada", description: `${data.guest} — ${accommodationName} | ${r.packageName}`, type: "reservation", entityId: r.id });
+    addHistory({ action: "Reserva criada", description: `${data.guest} — ${data.accommodationName} | ${data.packageName}`, type: "reservation", entityId: r.id });
     return r;
   }, [addHistory]);
 
   const updateReservation = useCallback((id: string, changes: Partial<Reservation>) => {
-    setReservationsRaw(prev => { const u = prev.map(r => r.id === id ? { ...r, ...changes } : r); save("tribo_v4_reservations", u); return u; });
+    setReservationsRaw(prev => {
+      const current = prev.find(r => r.id === id);
+      const updated = prev.map(r => r.id === id ? { ...r, ...changes } : r);
+      save("tribo_v5_reservations", updated);
+      if (current) {
+        const affectedIds = new Set([current.accommodationId, changes.accommodationId || current.accommodationId]);
+        setAccommodationsRaw(accPrev => {
+          const synced = accPrev.map(acc => affectedIds.has(acc.id) && acc.status !== "manutenção"
+            ? { ...acc, status: syncAccStatus(acc.id, updated) }
+            : acc);
+          save("tribo_v4_accommodations", synced);
+          return synced;
+        });
+      }
+      return updated;
+    });
   }, []);
 
-  const cancelReservation = useCallback((id: string, guest: string, acc: string, accId?: string) => {
+  const cancelReservation = useCallback((id: string, accId: string, guest: string, acc: string) => {
     setReservationsRaw(prev => {
-      const target = prev.find(r => r.id === id);
-      const targetAccId = accId ?? target?.accommodationId ?? target?.roomId ?? "";
       const updated = prev.map(r => r.id === id ? { ...r, status: "cancelado" as ReservationStatus } : r);
-      save("tribo_v4_reservations", updated);
+      save("tribo_v5_reservations", updated);
       setAccommodationsRaw(accPrev => {
-        const s = syncAccStatus(targetAccId, updated);
-        const u = accPrev.map(a => a.id === targetAccId && a.status !== "manutenção" ? { ...a, status: s } : a);
+        const s = syncAccStatus(accId, updated);
+        const u = accPrev.map(a => a.id === accId && a.status !== "manutenção" ? { ...a, status: s } : a);
         save("tribo_v4_accommodations", u);
         return u;
       });
@@ -420,7 +395,7 @@ export function useStore() {
     setReservationsRaw(prev => {
       const target = prev.find(r => r.id === id);
       const updated = prev.filter(r => r.id !== id);
-      save("tribo_v4_reservations", updated);
+      save("tribo_v5_reservations", updated);
       if (target) {
         setAccommodationsRaw(accPrev => {
           const s = syncAccStatus(target.accommodationId, updated);
@@ -434,26 +409,23 @@ export function useStore() {
     addHistory({ action: "Reserva excluída", description: `${guest} — ${acc}`, type: "reservation", entityId: id });
   }, [addHistory]);
 
-  const checkinReservation = useCallback((id: string, g: string, a: string, accId?: string) => {
-    const targetAccId = accId ?? reservations.find(r => r.id === id)?.accommodationId ?? "";
+  const checkinReservation = useCallback((id: string, g: string, a: string, accId: string) => {
     updateReservation(id, { status: "hospedado" });
     setAccommodationsRaw(prev => {
-      const u = prev.map(acc => acc.id === targetAccId && acc.status !== "manutenção" ? { ...acc, status: "ocupado" as AccommodationStatus } : acc);
+      const u = prev.map(acc => acc.id === accId && acc.status !== "manutenção" ? { ...acc, status: "ocupado" as AccommodationStatus } : acc);
       save("tribo_v4_accommodations", u);
       return u;
     });
     addHistory({ action: "Check-in realizado", description: `${g} — ${a}`, type: "reservation", entityId: id });
-  }, [reservations, updateReservation, addHistory]);
+  }, [updateReservation, addHistory]);
 
-  const checkoutReservation = useCallback((id: string, g: string, a: string, accId?: string) => {
+  const checkoutReservation = useCallback((id: string, g: string, a: string, accId: string) => {
     setReservationsRaw(prev => {
-      const target = prev.find(r => r.id === id);
-      const targetAccId = accId ?? target?.accommodationId ?? target?.roomId ?? "";
-      const updated = prev.map(r => r.id === id ? { ...r, status: "confirmado" as ReservationStatus } : r);
-      save("tribo_v4_reservations", updated);
+      const updated = prev.map(r => r.id === id ? { ...r, status: "concluído" as ReservationStatus } : r);
+      save("tribo_v5_reservations", updated);
       setAccommodationsRaw(accPrev => {
-        const s = syncAccStatus(targetAccId, updated);
-        const u = accPrev.map(acc => acc.id === targetAccId && acc.status !== "manutenção" ? { ...acc, status: s } : acc);
+        const s = syncAccStatus(accId, updated);
+        const u = accPrev.map(acc => acc.id === accId && acc.status !== "manutenção" ? { ...acc, status: s } : acc);
         save("tribo_v4_accommodations", u);
         return u;
       });
@@ -498,16 +470,16 @@ export function useStore() {
   // ─── Services ───────────────────────────────────────────────────────────────
   const addService = useCallback((data: Omit<Service, "id">) => {
     const s: Service = { ...data, id: generateId("S") };
-    setServicesRaw(prev => { const u = [...prev, s]; save("tribo_v3_services", u); return u; });
+    setServicesRaw(prev => { const u = [...prev, s]; save("tribo_v4_services", u); return u; });
     addHistory({ action: "Serviço adicionado", description: data.name, type: "service", entityId: s.id });
   }, [addHistory]);
 
   const updateService = useCallback((id: string, changes: Partial<Service>) => {
-    setServicesRaw(prev => { const u = prev.map(s => s.id === id ? { ...s, ...changes } : s); save("tribo_v3_services", u); return u; });
+    setServicesRaw(prev => { const u = prev.map(s => s.id === id ? { ...s, ...changes } : s); save("tribo_v4_services", u); return u; });
   }, []);
 
   const deleteService = useCallback((id: string, name: string) => {
-    setServicesRaw(prev => { const u = prev.filter(s => s.id !== id); save("tribo_v3_services", u); return u; });
+    setServicesRaw(prev => { const u = prev.filter(s => s.id !== id); save("tribo_v4_services", u); return u; });
     addHistory({ action: "Serviço excluído", description: name, type: "service", entityId: id });
   }, [addHistory]);
 
@@ -554,7 +526,7 @@ export function useStore() {
   }, []);
 
   return {
-    accommodations, rooms: accommodations, reservations, transactions, employees, services, promotions, packages, history,
+    accommodations, reservations, transactions, employees, services, promotions, packages, history,
     addReservation, updateReservation, deleteReservation, cancelReservation, checkinReservation, checkoutReservation,
     addAccommodation, updateAccommodation, deleteAccommodation,
     addEmployee, updateEmployee, deleteEmployee,
@@ -567,5 +539,3 @@ export function useStore() {
 }
 
 export type Store = ReturnType<typeof useStore>;
-
-

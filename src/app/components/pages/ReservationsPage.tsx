@@ -8,13 +8,13 @@ const STATUS_CFG: Record<ReservationStatus, { label: string; bg: string; text: s
   pendente: { label: "Pendente", bg: "#c4882a15", text: "#c4882a" },
   cancelado: { label: "Cancelado", bg: "#b9323215", text: "#b93232" },
   hospedado: { label: "Hospedado", bg: "#1e5f7415", text: "#1e5f74" },
+  concluído: { label: "Concluído", bg: "#1a2e1420", text: "#1a2e14" },
 };
 
 const PAYMENT_METHODS = ["Pix", "Dinheiro", "Cartão de Crédito", "Cartão de Débito", "Transferência Bancária"] as const;
 
-const DISCOUNT_OPTIONS = [0, 5, 10, 15, 20];
-
 function fmt(d: string) { return d ? `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}` : "—"; }
+function fmtShort(d: string) { return d ? `${d.slice(8, 10)}/${d.slice(5, 7)}` : "—"; }
 
 const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
@@ -24,16 +24,24 @@ interface ModalForm {
   guest: string; phone: string; email: string;
   accommodationId: string;
   checkin: string; checkout: string;
-  guests: string; paymentMethod: string; notes: string;
+  checkinTime: string; checkoutTime: string;
+  guests: string;
+  paymentMethod: string;
+  paymentMethod2: string;
+  notes: string;
   packageId: string;
+  packageValue: number;
   optionals: { id: string; qty: number; notes: string }[];
-  discountPercent: number;
+  paidPercent: number;
 }
 
 function ReservationModal({ store, reservation, onClose }: { store: Store; reservation?: Reservation; onClose: () => void }) {
   const { accommodations, reservations, packages, services, addReservation, updateReservation } = store;
   const activePkgs = packages.filter(p => p.active);
   const availableServices = services.filter(s => s.available);
+
+  const initPkgId = reservation?.packageId || activePkgs[0]?.id || "";
+  const initPkg = packages.find(p => p.id === initPkgId);
 
   const [form, setForm] = useState<ModalForm>({
     guest: reservation?.guest || "",
@@ -42,26 +50,28 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
     accommodationId: reservation?.accommodationId || accommodations[0]?.id || "",
     checkin: reservation?.checkin || "",
     checkout: reservation?.checkout || "",
+    checkinTime: reservation?.checkinTime || "14:00",
+    checkoutTime: reservation?.checkoutTime || "12:00",
     guests: String(reservation?.guests || 2),
     paymentMethod: reservation?.paymentMethod || "Pix",
+    paymentMethod2: reservation?.paymentMethod2 || "",
     notes: reservation?.notes || "",
-    packageId: reservation?.packageId || activePkgs[0]?.id || "",
+    packageId: initPkgId,
+    packageValue: reservation?.packageValue ?? (initPkg?.value || 500),
     optionals: reservation?.optionals?.map(o => ({ id: o.id, qty: o.quantity, notes: o.notes })) || [],
-    discountPercent: reservation?.discountPercent || 0,
+    paidPercent: reservation?.paidPercent ?? 0,
   });
   const [error, setError] = useState("");
 
   const selectedAcc = accommodations.find(a => a.id === form.accommodationId);
   const selectedPkg = packages.find(p => p.id === form.packageId);
 
-  const packageValue = selectedPkg?.value || 0;
   const optionalsTotal = form.optionals.reduce((sum, opt) => {
     const svc = availableServices.find(s => s.id === opt.id);
     return sum + (svc ? svc.value * Math.max(1, opt.qty) : 0);
   }, 0);
-  const subtotal = packageValue + optionalsTotal;
-  const discountAmount = Math.round(subtotal * form.discountPercent / 100);
-  const finalValue = subtotal - discountAmount;
+  const finalValue = form.packageValue + optionalsTotal;
+  const paidAmount = Math.round(finalValue * form.paidPercent / 100);
 
   function toggleOptional(id: string) {
     setForm(f => {
@@ -93,12 +103,15 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
       guest: form.guest.trim(), phone: form.phone.trim(), email: form.email.trim(),
       accommodationId: form.accommodationId, accommodationName: selectedAcc?.name || "",
       checkin: form.checkin, checkout: form.checkout,
-      value: finalValue, originalValue: subtotal,
-      packageId: form.packageId, packageName: selectedPkg?.name || "", packageValue,
+      checkinTime: form.checkinTime, checkoutTime: form.checkoutTime,
+      value: finalValue, originalValue: finalValue,
+      packageId: form.packageId, packageName: selectedPkg?.name || "", packageValue: form.packageValue,
       optionals: builtOptionals,
-      discountPercent: form.discountPercent, discountAmount,
+      discountPercent: 0, discountAmount: 0,
       guests: parseInt(form.guests) || 1,
       paymentMethod: form.paymentMethod as typeof PAYMENT_METHODS[number],
+      paymentMethod2: form.paymentMethod2 || undefined,
+      paidPercent: form.paidPercent,
       notes: form.notes.trim(),
     };
 
@@ -108,56 +121,66 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(10,18,7,0.65)", backdropFilter: "blur(6px)" }}>
-      <div className="rounded-2xl w-full max-w-2xl" style={{ background: "#fdfaf5", maxHeight: "95vh", display: "flex", flexDirection: "column" }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0" style={{ borderColor: "rgba(44,35,18,0.08)" }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600, fontSize: "1.1rem" }}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: "rgba(10,18,7,0.65)", backdropFilter: "blur(6px)" }}>
+      <div className="rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl" style={{ background: "#fdfaf5", maxHeight: "95vh", display: "flex", flexDirection: "column" }}>
+        <div className="flex items-center justify-between px-5 md:px-6 py-4 border-b flex-shrink-0" style={{ borderColor: "rgba(44,35,18,0.08)" }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600, fontSize: "1.05rem" }}>
             {reservation ? "Editar Reserva" : "Nova Reserva"}
           </h2>
-          <button aria-label="Fechar" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={15} /></button>
         </div>
 
-        <div className="overflow-y-auto flex-1 px-6 py-5 flex flex-col gap-5">
-
+        <div className="overflow-y-auto flex-1 px-5 md:px-6 py-5 flex flex-col gap-5">
           {/* 1. Dados do hóspede */}
           <section>
             <div style={{ fontSize: "0.7rem", color: "#7a7060", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Dados do Hóspede</div>
-            <div className="grid grid-cols-2 gap-3">
-              <div style={{ gridColumn: "1/-1" }}>
+            <div className="flex flex-col gap-3">
+              <div>
                 <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Nome completo *</label>
-                <input aria-label="Nome completo" value={form.guest} onChange={e => { setForm(f => ({ ...f, guest: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                <input value={form.guest} onChange={e => { setForm(f => ({ ...f, guest: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
               </div>
-              {[
-                { label: "Telefone", key: "phone", type: "text" },
-                { label: "E-mail", key: "email", type: "email" },
-                { label: "Check-in *", key: "checkin", type: "date" },
-                { label: "Check-out *", key: "checkout", type: "date" },
-                { label: "Nº de Hóspedes", key: "guests", type: "number" },
-              ].map(({ label, key, type }) => (
-                <div key={key}>
-                  <label  style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>{label}</label>
-                  <input aria-label={label} type={type} value={form[key as keyof ModalForm] as string} onChange={e => { setForm(f => ({ ...f, [key]: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Telefone</label>
+                  <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
                 </div>
-              ))}
-              <div>
-                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Acomodação *</label>
-                <select aria-label="Acomodação" value={form.accommodationId} onChange={e => { setForm(f => ({ ...f, accommodationId: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
-                  {accommodations.filter(a => a.status !== "manutenção").map(a => (
-                    <option key={a.id} value={a.id}>{a.name} ({a.status})</option>
-                  ))}
-                </select>
+                <div>
+                  <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>E-mail</label>
+                  <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                </div>
               </div>
               <div>
-                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Pagamento</label>
-                <select aria-label="Método de Pagamento" value={form.paymentMethod} onChange={e => setForm(f => ({ ...f, paymentMethod: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
-                  {PAYMENT_METHODS.map(m => <option key={m}>{m}</option>)}
-                </select>
+                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Check-in *</label>
+                <div className="flex gap-2">
+                  <input type="date" value={form.checkin} onChange={e => { setForm(f => ({ ...f, checkin: e.target.value })); setError(""); }} className="flex-1 px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                  <input type="time" value={form.checkinTime} onChange={e => setForm(f => ({ ...f, checkinTime: e.target.value }))} className="w-24 px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Check-out *</label>
+                <div className="flex gap-2">
+                  <input type="date" value={form.checkout} onChange={e => { setForm(f => ({ ...f, checkout: e.target.value })); setError(""); }} className="flex-1 px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                  <input type="time" value={form.checkoutTime} onChange={e => setForm(f => ({ ...f, checkoutTime: e.target.value }))} className="w-24 px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Nº de Hóspedes</label>
+                  <input type="number" value={form.guests} onChange={e => setForm(f => ({ ...f, guests: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Acomodação *</label>
+                  <select value={form.accommodationId} onChange={e => { setForm(f => ({ ...f, accommodationId: e.target.value })); setError(""); }} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                    {accommodations.filter(a => a.status !== "manutenção").map(a => (
+                      <option key={a.id} value={a.id}>{a.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </section>
 
-          {/* 2. Pacote (obrigatório) */}
+          {/* 2. Pacote */}
           <section>
             <div style={{ fontSize: "0.7rem", color: "#7a7060", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
               Selecionar Pacote <span style={{ color: "#b93232" }}>*</span>
@@ -166,59 +189,44 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
               {activePkgs.map(pkg => {
                 const sel = form.packageId === pkg.id;
                 return (
-                  <button key={pkg.id} type="button" onClick={() => setForm(f => ({ ...f, packageId: pkg.id }))}
-                    className="flex items-start gap-4 px-4 py-3.5 rounded-2xl text-left transition-all"
-                    aria-label={`Selecionar pacote: ${pkg.name}`}
+                  <button key={pkg.id} type="button" onClick={() => setForm(f => ({ ...f, packageId: pkg.id, packageValue: pkg.value }))}
+                    className="flex items-start gap-3 px-4 py-3 rounded-2xl text-left transition-all"
                     style={{ background: sel ? "#1a2e14" : "#f0ead8", border: `2px solid ${sel ? "#1a2e14" : "rgba(44,35,18,0.1)"}` }}>
                     <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5" style={{ borderColor: sel ? "#d4a84b" : "#7a7060" }}>
                       {sel && <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#d4a84b" }} />}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div style={{ fontWeight: 600, fontSize: "0.95rem", color: sel ? "#f7f4ef" : "#1a2e14" }}>{pkg.name}</div>
-                        <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 700, fontSize: "1rem", color: sel ? "#d4a84b" : "#2d5016" }}>
-                          R$ {pkg.value}<span style={{ fontSize: "0.65rem", fontWeight: 400, color: sel ? "rgba(247,244,239,0.5)" : "#7a7060" }}>/casal</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <div style={{ fontWeight: 600, fontSize: "0.9rem", color: sel ? "#f7f4ef" : "#1a2e14" }}>{pkg.name}</div>
+                        <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 700, fontSize: "0.9rem", color: sel ? "#d4a84b" : "#2d5016", flexShrink: 0 }}>
+                          R$ {pkg.value}
                         </div>
                       </div>
-                      <div style={{ fontSize: "0.78rem", color: sel ? "rgba(247,244,239,0.6)" : "#7a7060", marginTop: 2 }}>{pkg.description}</div>
-                      <div className="flex flex-wrap gap-1.5 mt-2">
-                        {pkg.includes.map((item, i) => (
-                          <span key={i} className="flex items-center gap-1 px-2 py-0.5 rounded-full"
-                            style={{ fontSize: "0.68rem", background: sel ? "rgba(255,255,255,0.1)" : "#2d501612", color: sel ? "rgba(247,244,239,0.8)" : "#2d5016", fontWeight: 500 }}>
-                            <Check size={9} /> {item}
-                          </span>
-                        ))}
-                      </div>
+                      <div style={{ fontSize: "0.75rem", color: sel ? "rgba(247,244,239,0.6)" : "#7a7060", marginTop: 2 }}>{pkg.description}</div>
                     </div>
                   </button>
                 );
               })}
-              {activePkgs.length === 0 && (
-                <div className="text-center py-4 rounded-2xl" style={{ background: "#f0ead8", fontSize: "0.85rem", color: "#7a7060" }}>
-                  Nenhum pacote ativo. Crie um pacote na aba Pacotes.
-                </div>
-              )}
             </div>
+            {form.packageId && (
+              <div className="mt-3">
+                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Valor do Pacote (R$) — editável</label>
+                <input type="number" value={form.packageValue} onChange={e => setForm(f => ({ ...f, packageValue: +e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+              </div>
+            )}
           </section>
 
           {/* 3. Opcionais */}
           <section>
             <div style={{ fontSize: "0.7rem", color: "#7a7060", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Serviços Opcionais</div>
             <div className="flex flex-col gap-2">
-              {availableServices.length === 0 && (
-                <div className="px-4 py-3 rounded-xl" style={{ background: "#f0ead8", fontSize: "0.82rem", color: "#7a7060" }}>
-                  Nenhum serviço disponível. Cadastre serviços na aba Serviços.
-                </div>
-              )}
               {availableServices.map(item => {
                 const selected = form.optionals.find(o => o.id === item.id);
-                const hint = item.hasQuantity
-                  ? `R$ ${item.value} por ${item.quantityLabel || "pessoa"}`
-                  : `R$ ${item.value} por ${item.quantityLabel || "serviço"}`;
                 return (
                   <div key={item.id}>
-                    <button aria-label={`Selecionar serviço: ${item.name}`} type="button" onClick={() => toggleOptional(item.id)}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors"
+                    <button type="button" onClick={() => toggleOptional(item.id)}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left"
                       style={{ background: selected ? "#2d501612" : "#f0ead8", border: `1.5px solid ${selected ? "#2d501640" : "transparent"}` }}>
                       <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
                         style={{ background: selected ? "#2d5016" : "#ede8df", border: selected ? "none" : "1.5px solid rgba(44,35,18,0.2)" }}>
@@ -226,27 +234,20 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
                       </div>
                       <div className="flex-1">
                         <div style={{ fontSize: "0.875rem", color: "#1c1a17", fontWeight: 500 }}>{item.name}</div>
-                        <div style={{ fontSize: "0.75rem", color: "#7a7060" }}>{hint}</div>
+                        <div style={{ fontSize: "0.72rem", color: "#7a7060" }}>R$ {item.value} por {item.quantityLabel || "serviço"}</div>
                       </div>
-                      <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 600, color: selected ? "#2d5016" : "#7a7060", fontSize: "0.9rem" }}>
-                        + R$ {selected ? item.value * selected.qty : item.value}
-                      </div>
+                      <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 600, color: selected ? "#2d5016" : "#7a7060", fontSize: "0.85rem", flexShrink: 0 }}>
+                        +R$ {selected ? item.value * selected.qty : item.value}
+                      </span>
                     </button>
-                    {selected && (
-                      <div className="mt-1 ml-8 pl-4 flex items-center gap-3 flex-wrap" style={{ borderLeft: "2px solid #2d501630" }}>
-                        {item.hasQuantity && (
-                          <div className="flex items-center gap-2">
-                            <span style={{ fontSize: "0.75rem", color: "#7a7060" }}>Qtd ({item.quantityLabel}):</span>
-                            <div className="flex items-center gap-2">
-                              <button aria-label="Diminuir quantidade" type="button" onClick={() => setOptQty(item.id, selected.qty - 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Minus size={11} /></button>
-                              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.9rem", fontWeight: 600, minWidth: 20, textAlign: "center" }}>{selected.qty}</span>
-                              <button aria-label="Aumentar quantidade" type="button" onClick={() => setOptQty(item.id, selected.qty + 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Plus size={11} /></button>
-                            </div>
-                          </div>
-                        )}
-                        <input aria-label="Observação (opcional)" placeholder="Observação (opcional)" value={selected.notes}
-                          onChange={e => setForm(f => ({ ...f, optionals: f.optionals.map(o => o.id === item.id ? { ...o, notes: e.target.value } : o) }))}
-                          className="flex-1 px-3 py-1.5 rounded-lg outline-none" style={{ background: "#ede8df", border: "none", fontSize: "0.8rem", minWidth: 140 }} />
+                    {selected && item.hasQuantity && (
+                      <div className="mt-1 ml-8 pl-4 flex items-center gap-3" style={{ borderLeft: "2px solid #2d501630" }}>
+                        <span style={{ fontSize: "0.75rem", color: "#7a7060" }}>Qtd:</span>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => setOptQty(item.id, selected.qty - 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Minus size={11} /></button>
+                          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.9rem", fontWeight: 600, minWidth: 20, textAlign: "center" }}>{selected.qty}</span>
+                          <button type="button" onClick={() => setOptQty(item.id, selected.qty + 1)} className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><Plus size={11} /></button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -255,27 +256,58 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
             </div>
           </section>
 
-          {/* 4. Desconto */}
+          {/* 4. Valor e forma de pagamento */}
           <section>
-            <div style={{ fontSize: "0.7rem", color: "#7a7060", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Desconto</div>
-            <div className="flex gap-2">
-              {DISCOUNT_OPTIONS.map(pct => (
-                <button key={pct} type="button" onClick={() => setForm(f => ({ ...f, discountPercent: f.discountPercent === pct ? 0 : pct }))}
-                  className="flex-1 py-2.5 rounded-xl transition-all"
-                  style={{ background: form.discountPercent === pct ? "#1a2e14" : "#f0ead8", color: form.discountPercent === pct ? "#f7f4ef" : "#7a7060", fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", fontWeight: form.discountPercent === pct ? 700 : 400, border: `1.5px solid ${form.discountPercent === pct ? "#1a2e14" : "rgba(44,35,18,0.1)"}` }}>
-                  {pct === 0 ? "Sem desc." : `-${pct}%`}
-                </button>
-              ))}
+            <div style={{ fontSize: "0.7rem", color: "#7a7060", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Valor e Forma de Pagamento</div>
+            <div className="flex flex-col gap-3">
+              <div className="rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: "#1a2e14" }}>
+                <div>
+                  <div style={{ fontSize: "0.68rem", color: "rgba(247,244,239,0.55)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Valor Total</div>
+                  <div style={{ fontSize: "0.72rem", color: "rgba(247,244,239,0.45)", marginTop: 2 }}>Pacote + serviços opcionais</div>
+                </div>
+                <output style={{ fontFamily: "'DM Mono', monospace", color: "#d4a84b", fontSize: "1.15rem", fontWeight: 700 }}>
+                  R$ {finalValue.toLocaleString("pt-BR")}
+                </output>
+              </div>
+              <div>
+                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Forma de Pagamento (principal)</label>
+                <select value={form.paymentMethod} onChange={e => setForm(f => ({ ...f, paymentMethod: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                  {PAYMENT_METHODS.map(m => <option key={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>Segundo método (pagamento misto, opcional)</label>
+                <select value={form.paymentMethod2} onChange={e => setForm(f => ({ ...f, paymentMethod2: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }}>
+                  <option value="">— nenhum —</option>
+                  {PAYMENT_METHODS.filter(m => m !== form.paymentMethod).map(m => <option key={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 5 }}>
+                  % Pago — {form.paidPercent}%
+                  {form.paidPercent > 0 && <span style={{ color: "#2d5016", marginLeft: 6 }}>· R$ {paidAmount.toLocaleString("pt-BR")}</span>}
+                </label>
+                <input type="range" min={0} max={100} step={5} value={form.paidPercent} onChange={e => setForm(f => ({ ...f, paidPercent: +e.target.value }))}
+                  className="w-full" style={{ accentColor: "#2d5016" }} />
+                <div className="flex gap-2 mt-2">
+                  {[0, 25, 50, 75, 100].map(v => (
+                    <button key={v} type="button" onClick={() => setForm(f => ({ ...f, paidPercent: v }))}
+                      className="flex-1 py-1.5 rounded-lg" style={{ background: form.paidPercent === v ? "#1a2e14" : "#ede8df", color: form.paidPercent === v ? "#f7f4ef" : "#7a7060", fontSize: "0.72rem", fontFamily: "'DM Mono', monospace" }}>
+                      {v}%
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
 
           {/* 5. Observações */}
           <section>
             <label style={{ fontSize: "0.78rem", color: "#7a7060", fontWeight: 500, display: "block", marginBottom: 6 }}>Observações gerais</label>
-            <input aria-label="Observações gerais" value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
+            <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl outline-none" style={{ background: "#f0ead8", border: "1px solid rgba(44,35,18,0.12)", fontSize: "0.875rem" }} />
           </section>
 
-          {/* Resumo de valor */}
+          {/* Resumo */}
           {selectedPkg && (
             <div className="rounded-2xl overflow-hidden" style={{ border: "1.5px solid rgba(44,35,18,0.1)" }}>
               <div style={{ background: "#f0ead8", padding: "12px 16px" }}>
@@ -283,7 +315,7 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between" style={{ fontSize: "0.85rem" }}>
                     <span style={{ color: "#7a7060" }}>{selectedPkg.name}</span>
-                    <span style={{ fontFamily: "'DM Mono', monospace", color: "#1c1a17" }}>R$ {packageValue}</span>
+                    <span style={{ fontFamily: "'DM Mono', monospace", color: "#1c1a17" }}>R$ {form.packageValue}</span>
                   </div>
                   {form.optionals.map(opt => {
                     const svc = availableServices.find(s => s.id === opt.id);
@@ -295,17 +327,19 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
                       </div>
                     );
                   })}
-                  {form.discountPercent > 0 && (
-                    <div className="flex justify-between" style={{ fontSize: "0.82rem" }}>
-                      <span style={{ color: "#c4882a" }}>- Desconto {form.discountPercent}%</span>
-                      <span style={{ fontFamily: "'DM Mono', monospace", color: "#c4882a" }}>- R$ {discountAmount}</span>
-                    </div>
-                  )}
                 </div>
               </div>
-              <div className="flex items-center justify-between px-4 py-3" style={{ background: "#1a2e14" }}>
-                <span style={{ fontSize: "0.82rem", color: "rgba(247,244,239,0.6)" }}>Total</span>
-                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.5rem", color: "#d4a84b", fontWeight: 700 }}>R$ {finalValue.toLocaleString("pt-BR")}</div>
+              <div className="px-4 py-3" style={{ background: "#1a2e14" }}>
+                <div className="flex items-center justify-between">
+                  <span style={{ fontSize: "0.82rem", color: "rgba(247,244,239,0.6)" }}>Valor Total</span>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.4rem", color: "#d4a84b", fontWeight: 700 }}>R$ {finalValue.toLocaleString("pt-BR")}</div>
+                </div>
+                {form.paidPercent > 0 && (
+                  <div className="flex items-center justify-between mt-1">
+                    <span style={{ fontSize: "0.72rem", color: "rgba(247,244,239,0.45)" }}>Pago ({form.paidPercent}%)</span>
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.82rem", color: "#4a9e4a" }}>R$ {paidAmount.toLocaleString("pt-BR")}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -313,10 +347,10 @@ function ReservationModal({ store, reservation, onClose }: { store: Store; reser
           {error && <div className="px-3 py-2.5 rounded-xl" style={{ background: "#b9323212", color: "#b93232", fontSize: "0.82rem" }}>{error}</div>}
         </div>
 
-        <div className="px-6 py-4 border-t flex gap-3 flex-shrink-0" style={{ borderColor: "rgba(44,35,18,0.08)" }}>
+        <div className="px-5 md:px-6 py-4 border-t flex gap-3 flex-shrink-0" style={{ borderColor: "rgba(44,35,18,0.08)" }}>
           <button onClick={onClose} className="flex-1 py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem" }}>Cancelar</button>
           <button onClick={handleSave} className="flex-1 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem", fontWeight: 500 }}>
-            {reservation ? "Salvar Alterações" : "Confirmar Reserva"}
+            {reservation ? "Salvar" : "Confirmar Reserva"}
           </button>
         </div>
       </div>
@@ -352,40 +386,44 @@ export function ReservationsPage({ store }: { store: Store }) {
 
   function getResForDay(day: number) {
     const ds = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return reservations.filter(r => r.status !== "cancelado" && ds >= r.checkin && ds < r.checkout);
+    return reservations.filter(r => r.status !== "cancelado" && r.status !== "concluído" && ds >= r.checkin && ds < r.checkout);
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 md:gap-5">
       {modal !== null && (
         <ReservationModal store={store} reservation={modal === "new" ? undefined : modal} onClose={() => setModal(null)} />
       )}
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.5rem", color: "#1a2e14", fontWeight: 600 }}>Gestão de Reservas</h1>
-          <p style={{ fontSize: "0.82rem", color: "#7a7060" }}>{reservations.length} reservas registradas</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.4rem", color: "#1a2e14", fontWeight: 600 }}>Gestão de Reservas</h1>
+          <p style={{ fontSize: "0.8rem", color: "#7a7060" }}>{reservations.length} reservas registradas</p>
         </div>
-        <button onClick={() => setModal("new")} className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem", fontWeight: 500 }}>
-          <span style={{ fontSize: "1rem", lineHeight: 1 }}>+</span> Nova Reserva
+        <button onClick={() => setModal("new")} className="flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem", fontWeight: 500 }}>
+          <Plus size={16} /> <span className="hidden sm:inline">Nova Reserva</span><span className="sm:hidden">Nova</span>
         </button>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: "#ede8df" }}>
-          {(["list", "calendar"] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className="px-4 py-1.5 rounded-lg" style={{ background: tab === t ? "#fdfaf5" : "transparent", fontSize: "0.85rem", color: tab === t ? "#1c1a17" : "#7a7060", fontWeight: tab === t ? 500 : 400 }}>
-              {t === "list" ? "Lista" : "Calendário"}
-            </button>
-          ))}
+      {/* Filters */}
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: "#ede8df" }}>
+            {(["list", "calendar"] as const).map(t => (
+              <button key={t} onClick={() => setTab(t)} className="px-3 py-1.5 rounded-lg" style={{ background: tab === t ? "#fdfaf5" : "transparent", fontSize: "0.82rem", color: tab === t ? "#1c1a17" : "#7a7060", fontWeight: tab === t ? 500 : 400 }}>
+                {t === "list" ? "Lista" : "Calendário"}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl flex-1 min-w-40" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
+            <Search size={14} style={{ color: "#7a7060" }} />
+            <input placeholder="Buscar hóspede, acomodação…" value={search} onChange={e => setSearch(e.target.value)} className="flex-1 outline-none bg-transparent" style={{ fontSize: "0.82rem", color: "#1c1a17", minWidth: 0 }} />
+          </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl flex-1 min-w-48" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
-          <Search size={14} style={{ color: "#7a7060" }} />
-          <input placeholder="Buscar hóspede, acomodação…" value={search} onChange={e => setSearch(e.target.value)} className="flex-1 outline-none bg-transparent" style={{ fontSize: "0.85rem", color: "#1c1a17" }} />
-        </div>
-        <div className="flex gap-1 p-1 rounded-xl" style={{ background: "#ede8df" }}>
-          {(["todos", "hospedado", "confirmado", "pendente", "cancelado"] as const).map(s => (
-            <button key={s} onClick={() => setStatusFilter(s)} className="px-3 py-1 rounded-lg" style={{ background: statusFilter === s ? "#fdfaf5" : "transparent", fontSize: "0.75rem", color: statusFilter === s ? "#1c1a17" : "#7a7060" }}>
+        {/* Status filter chips — wrap on mobile */}
+        <div className="flex gap-1 flex-wrap p-1 rounded-xl" style={{ background: "#ede8df" }}>
+          {(["todos", "hospedado", "confirmado", "pendente", "concluído", "cancelado"] as const).map(s => (
+            <button key={s} onClick={() => setStatusFilter(s)} className="px-2.5 py-1 rounded-lg" style={{ background: statusFilter === s ? "#fdfaf5" : "transparent", fontSize: "0.72rem", color: statusFilter === s ? "#1c1a17" : "#7a7060" }}>
               {s === "todos" ? "Todos" : STATUS_CFG[s as ReservationStatus]?.label || s}
             </button>
           ))}
@@ -393,68 +431,122 @@ export function ReservationsPage({ store }: { store: Store }) {
       </div>
 
       {tab === "list" ? (
-        <div className="rounded-2xl overflow-hidden" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
-          <table className="w-full">
-            <thead>
-              <tr style={{ background: "#f0ead8", borderBottom: "1px solid rgba(44,35,18,0.07)" }}>
-                {["Hóspede", "Acomodação", "Check-in", "Check-out", "Pacote", "Opcionais", "Desc.", "Total", "Status", ""].map(h => (
-                  <th key={h} className="px-3 py-3 text-left" style={{ fontSize: "0.67rem", color: "#7a7060", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r, i) => (
-                <tr key={r.id} onClick={() => setSelectedId(r.id === selectedId ? null : r.id)} className="cursor-pointer" style={{ borderBottom: i < filtered.length - 1 ? "1px solid rgba(44,35,18,0.05)" : "none", background: selectedId === r.id ? "#f0ead8" : "transparent" }}>
-                  <td className="px-3 py-3">
-                    <div style={{ fontSize: "0.875rem", color: "#1c1a17", fontWeight: 500 }}>{r.guest}</div>
-                    <div style={{ fontSize: "0.72rem", color: "#7a7060" }}>{r.phone}</div>
-                  </td>
-                  <td className="px-3 py-3" style={{ fontSize: "0.8rem", color: "#7a7060" }}>{r.accommodationName}</td>
-                  <td className="px-3 py-3" style={{ fontSize: "0.78rem", fontFamily: "'DM Mono', monospace", color: "#1c1a17" }}>{fmt(r.checkin)}</td>
-                  <td className="px-3 py-3" style={{ fontSize: "0.78rem", fontFamily: "'DM Mono', monospace", color: "#1c1a17" }}>{fmt(r.checkout)}</td>
-                  <td className="px-3 py-3">
-                    <span className="px-2 py-0.5 rounded-full" style={{ fontSize: "0.67rem", background: "#1a2e1412", color: "#1a2e14", fontWeight: 500, whiteSpace: "nowrap" }}>
-                      {r.packageName || "—"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3" style={{ fontSize: "0.75rem", color: "#7a7060" }}>
-                    {(r.optionals?.length || 0) > 0 ? `${r.optionals.length} item` : "—"}
-                  </td>
-                  <td className="px-3 py-3" style={{ fontSize: "0.78rem", fontFamily: "'DM Mono', monospace", color: (r.discountPercent || 0) > 0 ? "#c4882a" : "#7a7060" }}>
-                    {(r.discountPercent || 0) > 0 ? `-${r.discountPercent}%` : "—"}
-                  </td>
-                  <td className="px-3 py-3">
-                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: "#2d5016", fontWeight: 600 }}>R$ {r.value.toLocaleString("pt-BR")}</div>
-                  </td>
-                  <td className="px-3 py-3">
-                    <span className="px-2.5 py-1 rounded-full" style={{ fontSize: "0.67rem", background: STATUS_CFG[r.status].bg, color: STATUS_CFG[r.status].text, fontWeight: 600, textTransform: "uppercase" }}>
-                      {STATUS_CFG[r.status].label}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="flex gap-1.5">
-                      <button aria-label="Editar reserva" onClick={e => { e.stopPropagation(); setModal(r); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#2d501615", color: "#2d5016" }}><Edit2 size={12} /></button>
-                      <button aria-label="Excluir reserva" onClick={e => { e.stopPropagation(); deleteReservation(r.id, r.guest, r.accommodationName); if (selectedId === r.id) setSelectedId(null); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323215", color: "#b93232" }}><Trash2 size={12} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && <tr><td colSpan={10} className="px-5 py-10 text-center" style={{ fontSize: "0.875rem", color: "#7a7060" }}>Nenhuma reserva encontrada</td></tr>}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* Mobile card list */}
+          <div className="flex flex-col gap-2 md:hidden">
+            {filtered.map(r => (
+              <div key={r.id} onClick={() => setSelectedId(r.id === selectedId ? null : r.id)}
+                className="rounded-2xl p-4 cursor-pointer"
+                style={{ background: selectedId === r.id ? "#f0ead8" : "#fdfaf5", border: `1px solid ${selectedId === r.id ? "rgba(44,35,18,0.15)" : "rgba(44,35,18,0.07)"}` }}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1 min-w-0 mr-2">
+                    <div style={{ fontSize: "0.925rem", color: "#1c1a17", fontWeight: 600 }}>{r.guest}</div>
+                    <div style={{ fontSize: "0.75rem", color: "#7a7060" }}>{r.phone}</div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full flex-shrink-0" style={{ fontSize: "0.65rem", background: STATUS_CFG[r.status].bg, color: STATUS_CFG[r.status].text, fontWeight: 700, textTransform: "uppercase" }}>
+                    {STATUS_CFG[r.status].label}
+                  </span>
+                </div>
+                <div style={{ fontSize: "0.8rem", color: "#1a2e14", fontWeight: 500, marginBottom: 6 }}>{r.accommodationName}</div>
+                <div className="flex items-center gap-3 flex-wrap" style={{ fontSize: "0.75rem", color: "#7a7060" }}>
+                  <span>⬐ {fmtShort(r.checkin)}{r.checkinTime ? " " + r.checkinTime : ""}</span>
+                  <span>→ {fmtShort(r.checkout)}{r.checkoutTime ? " " + r.checkoutTime : ""}</span>
+                  {r.packageName && <span className="px-1.5 py-0.5 rounded-full" style={{ background: "#1a2e1410", color: "#1a2e14", fontSize: "0.65rem" }}>{r.packageName}</span>}
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <div>
+                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.925rem", color: "#2d5016", fontWeight: 700 }}>R$ {r.value.toLocaleString("pt-BR")}</div>
+                    {(r.paidPercent ?? 0) > 0 && (
+                      <div style={{ fontSize: "0.68rem", color: (r.paidPercent ?? 0) >= 100 ? "#2d5016" : "#c4882a" }}>Pago: {r.paidPercent}%</div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={e => { e.stopPropagation(); setModal(r); }} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#2d501615", color: "#2d5016" }}><Edit2 size={13} /></button>
+                    <button onClick={e => { e.stopPropagation(); deleteReservation(r.id, r.guest, r.accommodationName); if (selectedId === r.id) setSelectedId(null); }} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#b9323215", color: "#b93232" }}><Trash2 size={13} /></button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div className="py-10 text-center rounded-2xl" style={{ background: "#fdfaf5", fontSize: "0.875rem", color: "#7a7060" }}>Nenhuma reserva encontrada</div>
+            )}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden md:block rounded-2xl overflow-hidden" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr style={{ background: "#f0ead8", borderBottom: "1px solid rgba(44,35,18,0.07)" }}>
+                    {["Hóspede", "Acomodação", "Check-in", "Check-out", "Pacote", "Opcionais", "Valor Total", "% Pago", "Status", ""].map(h => (
+                      <th key={h} className="px-3 py-3 text-left" style={{ fontSize: "0.67rem", color: "#7a7060", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((r, i) => (
+                    <tr key={r.id} onClick={() => setSelectedId(r.id === selectedId ? null : r.id)} className="cursor-pointer" style={{ borderBottom: i < filtered.length - 1 ? "1px solid rgba(44,35,18,0.05)" : "none", background: selectedId === r.id ? "#f0ead8" : "transparent" }}>
+                      <td className="px-3 py-3">
+                        <div style={{ fontSize: "0.875rem", color: "#1c1a17", fontWeight: 500 }}>{r.guest}</div>
+                        <div style={{ fontSize: "0.72rem", color: "#7a7060" }}>{r.phone}</div>
+                      </td>
+                      <td className="px-3 py-3" style={{ fontSize: "0.8rem", color: "#7a7060", whiteSpace: "nowrap" }}>{r.accommodationName}</td>
+                      <td className="px-3 py-3">
+                        <div style={{ fontSize: "0.78rem", fontFamily: "'DM Mono', monospace", color: "#1c1a17", whiteSpace: "nowrap" }}>{fmt(r.checkin)}</div>
+                        {r.checkinTime && <div style={{ fontSize: "0.68rem", color: "#7a7060" }}>{r.checkinTime}</div>}
+                      </td>
+                      <td className="px-3 py-3">
+                        <div style={{ fontSize: "0.78rem", fontFamily: "'DM Mono', monospace", color: "#1c1a17", whiteSpace: "nowrap" }}>{fmt(r.checkout)}</div>
+                        {r.checkoutTime && <div style={{ fontSize: "0.68rem", color: "#7a7060" }}>{r.checkoutTime}</div>}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className="px-2 py-0.5 rounded-full" style={{ fontSize: "0.67rem", background: "#1a2e1412", color: "#1a2e14", fontWeight: 500, whiteSpace: "nowrap" }}>{r.packageName || "—"}</span>
+                      </td>
+                      <td className="px-3 py-3" style={{ fontSize: "0.75rem", color: "#7a7060" }}>{(r.optionals?.length || 0) > 0 ? `${r.optionals.length} item` : "—"}</td>
+                      <td className="px-3 py-3">
+                        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: "#2d5016", fontWeight: 600, whiteSpace: "nowrap" }}>R$ {r.value.toLocaleString("pt-BR")}</div>
+                      </td>
+                      <td className="px-3 py-3">
+                        {(r.paidPercent ?? 0) > 0 ? (
+                          <div>
+                            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.8rem", color: (r.paidPercent ?? 0) >= 100 ? "#2d5016" : "#c4882a", fontWeight: 600 }}>{r.paidPercent}%</div>
+                            <div className="w-14 h-1 rounded-full mt-1" style={{ background: "#ede8df" }}>
+                              <div className="h-full rounded-full" style={{ width: `${r.paidPercent}%`, background: (r.paidPercent ?? 0) >= 100 ? "#2d5016" : "#c4882a" }} />
+                            </div>
+                          </div>
+                        ) : <span style={{ fontSize: "0.72rem", color: "#b93232" }}>Não pago</span>}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span className="px-2.5 py-1 rounded-full" style={{ fontSize: "0.65rem", background: STATUS_CFG[r.status].bg, color: STATUS_CFG[r.status].text, fontWeight: 600, textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                          {STATUS_CFG[r.status].label}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex gap-1.5">
+                          <button onClick={e => { e.stopPropagation(); setModal(r); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#2d501615", color: "#2d5016" }}><Edit2 size={12} /></button>
+                          <button onClick={e => { e.stopPropagation(); deleteReservation(r.id, r.guest, r.accommodationName); if (selectedId === r.id) setSelectedId(null); }} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#b9323215", color: "#b93232" }}><Trash2 size={12} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && <tr><td colSpan={10} className="px-5 py-10 text-center" style={{ fontSize: "0.875rem", color: "#7a7060" }}>Nenhuma reserva encontrada</td></tr>}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       ) : (
-        <div className="rounded-2xl p-5" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
-          <div className="flex items-center justify-between mb-5">
+        <div className="rounded-2xl p-4 md:p-5" style={{ background: "#fdfaf5", border: "1px solid rgba(44,35,18,0.08)" }}>
+          <div className="flex items-center justify-between mb-4">
             <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>{MONTHS[month]} {year}</h3>
             <div className="flex gap-2">
-              <button aria-label="Mês anterior" onClick={() => setCalDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronLeft size={15} /></button>
-              <button aria-label="Próximo mês" onClick={() => setCalDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronRight size={15} /></button>
+              <button onClick={() => setCalDate(new Date(year, month - 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronLeft size={15} /></button>
+              <button onClick={() => setCalDate(new Date(year, month + 1, 1))} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><ChevronRight size={15} /></button>
             </div>
           </div>
           <div className="grid grid-cols-7 gap-1 mb-1">
-            {["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"].map(d => (
-              <div key={d} className="text-center py-1" style={{ fontSize: "0.68rem", color: "#7a7060", fontWeight: 600, textTransform: "uppercase" }}>{d}</div>
+            {["D","S","T","Q","Q","S","S"].map((d, i) => (
+              <div key={i} className="text-center py-1" style={{ fontSize: "0.65rem", color: "#7a7060", fontWeight: 600, textTransform: "uppercase" }}>{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -464,11 +556,11 @@ export function ReservationsPage({ store }: { store: Store }) {
               const dayRes = getResForDay(day);
               const isToday = day === 4 && month === 5 && year === 2026;
               return (
-                <div key={day} className="rounded-xl p-1.5 min-h-14" style={{ background: isToday ? "#1a2e1415" : "#f0ead8", border: isToday ? "1.5px solid #1a2e14" : "1px solid transparent" }}>
-                  <span style={{ fontSize: "0.78rem", color: isToday ? "#1a2e14" : "#7a7060", fontWeight: isToday ? 600 : 400 }}>{day}</span>
+                <div key={day} className="rounded-lg p-1 min-h-10 md:min-h-14 md:rounded-xl" style={{ background: isToday ? "#1a2e1415" : "#f0ead8", border: isToday ? "1.5px solid #1a2e14" : "1px solid transparent" }}>
+                  <span style={{ fontSize: "0.7rem", color: isToday ? "#1a2e14" : "#7a7060", fontWeight: isToday ? 600 : 400 }}>{day}</span>
                   {dayRes.slice(0, 2).map(r => (
-                    <div key={r.id} onClick={() => setSelectedId(r.id)} className="rounded px-1 py-0.5 mt-0.5 truncate cursor-pointer" style={{ fontSize: "0.6rem", background: STATUS_CFG[r.status].bg, color: STATUS_CFG[r.status].text }}>
-                      {r.guest.split(" ")[0]}
+                    <div key={r.id} onClick={() => setSelectedId(r.id)} className="rounded px-1 py-0.5 mt-0.5 truncate cursor-pointer" style={{ fontSize: "0.55rem", background: STATUS_CFG[r.status].bg, color: STATUS_CFG[r.status].text }}>
+                      {r.accommodationName.replace("Cabana ", "").replace("Chalé ", "").replace("Suite ", "").replace("Flutuante ", "")}
                     </div>
                   ))}
                 </div>
@@ -480,92 +572,101 @@ export function ReservationsPage({ store }: { store: Store }) {
 
       {/* Detail panel */}
       {selected && (
-        <div className="fixed inset-y-0 right-0 w-80 z-40 flex flex-col" style={{ background: "#fdfaf5", borderLeft: "1px solid rgba(44,35,18,0.1)", boxShadow: "-8px 0 40px rgba(0,0,0,0.1)" }}>
-          <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "rgba(44,35,18,0.08)" }}>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>{selected.guest.split(" ")[0]}</h3>
-            <button aria-label="Fechar detalhes" onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={13} /></button>
-          </div>
-          <div className="flex-1 px-5 py-4 overflow-y-auto flex flex-col gap-3">
-            <div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1rem", color: "#1a2e14" }}>{selected.guest}</div>
-              <div style={{ fontSize: "0.8rem", color: "#7a7060" }}>{selected.phone}</div>
-              {selected.email && <div style={{ fontSize: "0.78rem", color: "#7a7060" }}>{selected.email}</div>}
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { l: "Acomodação", v: selected.accommodationName },
-                { l: "Hóspedes", v: `${selected.guests}` },
-                { l: "Check-in", v: fmt(selected.checkin) },
-                { l: "Check-out", v: fmt(selected.checkout) },
-                { l: "Pagamento", v: selected.paymentMethod },
-              ].map(({ l, v }) => (
-                <div key={l} className="p-2.5 rounded-xl" style={{ background: "#f0ead8" }}>
-                  <div style={{ fontSize: "0.65rem", color: "#7a7060", textTransform: "uppercase", letterSpacing: "0.05em" }}>{l}</div>
-                  <div style={{ fontSize: "0.82rem", color: "#1c1a17", fontWeight: 500, marginTop: 1 }}>{v}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Pacote */}
-            {selected.packageName && (
-              <div className="p-3 rounded-xl" style={{ background: "#1a2e1410", border: "1px solid #1a2e1420" }}>
-                <div style={{ fontSize: "0.67rem", color: "#7a7060", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>Pacote</div>
-                <div style={{ fontSize: "0.9rem", color: "#1a2e14", fontWeight: 600 }}>{selected.packageName}</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.82rem", color: "#2d5016" }}>R$ {(selected.packageValue || 0).toLocaleString("pt-BR")}</div>
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            style={{ background: "rgba(10,18,7,0.35)" }}
+            onClick={() => setSelectedId(null)}
+          />
+          {/* Panel: bottom sheet on mobile, right sidebar on md+ */}
+          <div
+            className="fixed z-50 flex flex-col inset-x-0 bottom-0 w-full rounded-t-[20px] max-h-[82vh] md:inset-y-0 md:right-0 md:left-auto md:bottom-auto md:w-80 md:rounded-none md:max-h-none"
+            style={{ background: "#fdfaf5", borderTop: "1px solid rgba(44,35,18,0.1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.18)" }}
+          >
+              <div className="flex items-center justify-between px-5 py-4 border-b flex-shrink-0" style={{ borderColor: "rgba(44,35,18,0.08)" }}>
+                <h3 style={{ fontFamily: "'Playfair Display', serif", color: "#1a2e14", fontWeight: 600 }}>{selected.accommodationName}</h3>
+                <button onClick={() => setSelectedId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#ede8df" }}><X size={13} /></button>
               </div>
-            )}
-
-            {/* Opcionais */}
-            {(selected.optionals?.length || 0) > 0 && (
-              <div>
-                <div style={{ fontSize: "0.67rem", color: "#7a7060", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5 }}>Opcionais</div>
-                <div className="flex flex-col gap-1.5">
-                  {selected.optionals.map(opt => (
-                    <div key={opt.id} className="flex justify-between px-3 py-2 rounded-lg" style={{ background: "#f0ead8", fontSize: "0.82rem" }}>
-                      <span style={{ color: "#1c1a17" }}>{opt.name}{opt.quantity > 1 ? ` ×${opt.quantity}` : ""}</span>
-                      <span style={{ fontFamily: "'DM Mono', monospace", color: "#2d5016" }}>+R$ {opt.total}</span>
+              <div className="flex-1 px-5 py-4 overflow-y-auto flex flex-col gap-3">
+                <div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: "1rem", color: "#1a2e14" }}>{selected.guest}</div>
+                  <div style={{ fontSize: "0.8rem", color: "#7a7060" }}>{selected.phone}</div>
+                  {selected.email && <div style={{ fontSize: "0.75rem", color: "#7a7060" }}>{selected.email}</div>}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { l: "Check-in", v: `${fmt(selected.checkin)}${selected.checkinTime ? " " + selected.checkinTime : ""}` },
+                    { l: "Check-out", v: `${fmt(selected.checkout)}${selected.checkoutTime ? " " + selected.checkoutTime : ""}` },
+                    { l: "Hóspedes", v: `${selected.guests}` },
+                    { l: "Forma de pagamento", v: selected.paymentMethod + (selected.paymentMethod2 ? ` + ${selected.paymentMethod2}` : "") },
+                  ].map(({ l, v }) => (
+                    <div key={l} className="p-2.5 rounded-xl" style={{ background: "#f0ead8", gridColumn: l === "Forma de pagamento" ? "1/-1" : undefined }}>
+                      <div style={{ fontSize: "0.62rem", color: "#7a7060", textTransform: "uppercase", letterSpacing: "0.05em" }}>{l}</div>
+                      <div style={{ fontSize: "0.8rem", color: "#1c1a17", fontWeight: 500, marginTop: 1 }}>{v}</div>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Total */}
-            <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(44,35,18,0.1)" }}>
-              {(selected.discountPercent || 0) > 0 && (
-                <div className="flex justify-between px-3 py-2" style={{ background: "#f0ead8", fontSize: "0.8rem" }}>
-                  <span style={{ color: "#c4882a" }}>Desconto -{selected.discountPercent}%</span>
-                  <span style={{ fontFamily: "'DM Mono', monospace", color: "#c4882a" }}>-R$ {selected.discountAmount}</span>
+                {selected.packageName && (
+                  <div className="p-3 rounded-xl" style={{ background: "#1a2e1410", border: "1px solid #1a2e1420" }}>
+                    <div style={{ fontSize: "0.62rem", color: "#7a7060", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>Pacote</div>
+                    <div style={{ fontSize: "0.9rem", color: "#1a2e14", fontWeight: 600 }}>{selected.packageName}</div>
+                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.82rem", color: "#2d5016" }}>R$ {(selected.packageValue || 0).toLocaleString("pt-BR")}</div>
+                  </div>
+                )}
+                {(selected.optionals?.length || 0) > 0 && (
+                  <div>
+                    <div style={{ fontSize: "0.62rem", color: "#7a7060", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5 }}>Opcionais</div>
+                    <div className="flex flex-col gap-1.5">
+                      {selected.optionals.map(opt => (
+                        <div key={opt.id} className="flex justify-between px-3 py-2 rounded-lg" style={{ background: "#f0ead8", fontSize: "0.82rem" }}>
+                          <span style={{ color: "#1c1a17" }}>{opt.name}{opt.quantity > 1 ? ` ×${opt.quantity}` : ""}</span>
+                          <span style={{ fontFamily: "'DM Mono', monospace", color: "#2d5016" }}>+R$ {opt.total}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(44,35,18,0.1)" }}>
+                  <div className="flex items-center justify-between px-3 py-2.5" style={{ background: "#1a2e14" }}>
+                    <span style={{ fontSize: "0.82rem", color: "rgba(247,244,239,0.6)" }}>Valor Total</span>
+                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "1rem", color: "#d4a84b", fontWeight: 700 }}>R$ {selected.value.toLocaleString("pt-BR")}</span>
+                  </div>
+                  {(selected.paidPercent ?? 0) > 0 && (
+                    <div className="px-3 py-2" style={{ background: "#f0ead8" }}>
+                      <div className="flex justify-between mb-1" style={{ fontSize: "0.75rem" }}>
+                        <span style={{ color: "#7a7060" }}>Pago ({selected.paidPercent}%)</span>
+                        <span style={{ fontFamily: "'DM Mono', monospace", color: "#2d5016", fontWeight: 600 }}>R$ {Math.round(selected.value * (selected.paidPercent ?? 0) / 100).toLocaleString("pt-BR")}</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full" style={{ background: "#ede8df" }}>
+                        <div className="h-full rounded-full" style={{ width: `${selected.paidPercent}%`, background: (selected.paidPercent ?? 0) >= 100 ? "#2d5016" : "#c4882a" }} />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              <div className="flex items-center justify-between px-3 py-2.5" style={{ background: "#1a2e14" }}>
-                <span style={{ fontSize: "0.82rem", color: "rgba(247,244,239,0.6)" }}>Total</span>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontSize: "1.05rem", color: "#d4a84b", fontWeight: 700 }}>R$ {selected.value.toLocaleString("pt-BR")}</span>
+                <span className="px-3 py-1.5 rounded-full w-fit" style={{ fontSize: "0.72rem", background: STATUS_CFG[selected.status].bg, color: STATUS_CFG[selected.status].text, fontWeight: 600, textTransform: "uppercase" }}>
+                  {STATUS_CFG[selected.status].label}
+                </span>
+                {selected.notes && <div className="p-3 rounded-xl" style={{ background: "#f0ead8", fontSize: "0.82rem", color: "#7a7060" }}>{selected.notes}</div>}
+              </div>
+              <div className="px-5 pb-5 pt-3 flex flex-col gap-2 border-t flex-shrink-0" style={{ borderColor: "rgba(44,35,18,0.06)" }}>
+                {selected.status === "pendente" && (
+                  <button onClick={() => updateReservation(selected.id, { status: "confirmado" })} className="w-full py-2.5 rounded-xl" style={{ background: "#2d5016", color: "#f7f4ef", fontSize: "0.875rem" }}>✓ Confirmar</button>
+                )}
+                {selected.status === "confirmado" && (
+                  <button onClick={() => checkinReservation(selected.id, selected.guest, selected.accommodationName, selected.accommodationId)} className="w-full py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>✓ Fazer Check-in</button>
+                )}
+                {selected.status === "hospedado" && (
+                  <button onClick={() => checkoutReservation(selected.id, selected.guest, selected.accommodationName, selected.accommodationId)} className="w-full py-2.5 rounded-xl" style={{ background: "#1e5f74", color: "#f7f4ef", fontSize: "0.875rem" }}>✓ Checkout → Concluído</button>
+                )}
+                <button onClick={() => setModal(selected)} className="w-full py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem", color: "#1c1a17" }}>✎ Editar</button>
+                {selected.status !== "cancelado" && selected.status !== "concluído" && (
+                  <button onClick={() => { cancelReservation(selected.id, selected.accommodationId, selected.guest, selected.accommodationName); setSelectedId(null); }} className="w-full py-2.5 rounded-xl" style={{ background: "#b9323215", color: "#b93232", fontSize: "0.875rem" }}>Cancelar Reserva</button>
+                )}
               </div>
             </div>
-
-            <span className="px-3 py-1.5 rounded-full w-fit" style={{ fontSize: "0.75rem", background: STATUS_CFG[selected.status].bg, color: STATUS_CFG[selected.status].text, fontWeight: 600, textTransform: "uppercase" }}>
-              {STATUS_CFG[selected.status].label}
-            </span>
-            {selected.notes && <div className="p-3 rounded-xl" style={{ background: "#f0ead8", fontSize: "0.82rem", color: "#7a7060" }}>{selected.notes}</div>}
-          </div>
-          <div className="px-5 pb-5 flex flex-col gap-2">
-            {selected.status === "pendente" && (
-              <button onClick={() => updateReservation(selected.id, { status: "confirmado" })} className="w-full py-2.5 rounded-xl" style={{ background: "#2d5016", color: "#f7f4ef", fontSize: "0.875rem" }}>✓ Confirmar</button>
-            )}
-            {selected.status === "confirmado" && (
-              <button onClick={() => checkinReservation(selected.id, selected.guest, selected.accommodationName, selected.accommodationId)} className="w-full py-2.5 rounded-xl" style={{ background: "#1a2e14", color: "#f7f4ef", fontSize: "0.875rem" }}>✓ Fazer Check-in</button>
-            )}
-            {selected.status === "hospedado" && (
-              <button onClick={() => checkoutReservation(selected.id, selected.guest, selected.accommodationName, selected.accommodationId)} className="w-full py-2.5 rounded-xl" style={{ background: "#1e5f74", color: "#f7f4ef", fontSize: "0.875rem" }}>✓ Fazer Check-out</button>
-            )}
-            <button onClick={() => setModal(selected)} className="w-full py-2.5 rounded-xl" style={{ background: "#ede8df", fontSize: "0.875rem", color: "#1c1a17" }}>✎ Editar</button>
-            {selected.status !== "cancelado" && (
-              <button onClick={() => { cancelReservation(selected.id, selected.accommodationId, selected.guest, selected.accommodationName); setSelectedId(null); }} className="w-full py-2.5 rounded-xl" style={{ background: "#b9323215", color: "#b93232", fontSize: "0.875rem" }}>Cancelar Reserva</button>
-            )}
-          </div>
-        </div>
-      )}
+          </>
+        )}
     </div>
   );
 }
